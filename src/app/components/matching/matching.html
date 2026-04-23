@@ -1,0 +1,67 @@
+<div class="fixed inset-0 w-full h-full bg-black z-[100] flex flex-col overflow-hidden">
+  
+  <!-- Local Camera Preview (Background) -->
+  <div class="absolute inset-0 z-0">
+    <video #localPreview autoplay playsinline muted class="w-full h-full object-cover scale-x-[-1] opacity-60"></video>
+    <!-- Dark overlay to make UI readable -->
+    <div class="absolute inset-0 bg-gradient-to-b from-[#010102]/80 via-transparent to-[#010102]/90"></div>
+  </div>
+
+  <!-- Animated Background Nodes -->
+  <div class="absolute inset-0 pointer-events-none z-10">
+    <div class="absolute top-10 left-10 w-2 h-2 bg-[#69DAFF] rounded-full animate-float blur-sm opacity-30"></div>
+    <div class="absolute bottom-20 right-10 w-3 h-3 bg-[#D674FF] rounded-full animate-float-slow blur-sm opacity-30"></div>
+  </div>
+
+  <!-- Main Matching UI -->
+  <main class="flex-1 flex flex-col items-center justify-center px-8 relative z-20">
+    
+    <!-- Radar Animation -->
+    <div class="relative w-72 h-72 mb-16 flex items-center justify-center">
+      <div class="absolute w-56 h-56 border-2 border-[#69DAFF]/30 rounded-full animate-radar-ring-1"></div>
+      <div class="absolute w-56 h-56 border-2 border-[#69DAFF]/20 rounded-full animate-radar-ring-2"></div>
+      
+      <div class="relative z-10 w-32 h-32 bg-[#1F1F23]/80 backdrop-blur-md border-2 border-[#69DAFF] rounded-full shadow-[0_0_60px_rgba(105,218,255,0.4)] flex items-center justify-center">
+        <span class="material-icons text-6xl text-[#69DAFF] animate-pulse">radar</span>
+      </div>
+    </div>
+
+    <!-- Finding Someone Text -->
+    <div class="mb-12 h-10 flex items-center justify-center">
+      <h2 class="text-3xl md:text-4xl font-space font-light tracking-tighter text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">
+        Finding someone<span class="inline-block w-12 text-left">{{ dots }}</span>
+      </h2>
+    </div>
+
+    <!-- Pro Tip Card -->
+    <div class="w-full max-w-sm bg-black/40 backdrop-blur-xl border border-white/10 rounded-[32px] p-8 shadow-2xl">
+      <div class="flex items-center justify-center space-x-2 text-[#D674FF] mb-4">
+        <span class="material-icons text-sm">lightbulb</span>
+        <span class="text-[10px] font-black tracking-[0.2em] uppercase">Pro Tip</span>
+      </div>
+      
+      <div class="min-h-[60px] flex items-center justify-center text-center">
+        <p class="text-base font-medium text-white/90 leading-relaxed italic">
+          "{{ tips[tipIndex] }}"
+        </p>
+      </div>
+      
+      <div class="mt-6 flex justify-center space-x-2">
+        <div *ngFor="let tip of tips; let i = index" 
+          class="h-1.5 rounded-full transition-all duration-300"
+          [ngClass]="i === tipIndex ? 'w-8 bg-[#69DAFF]' : 'w-1.5 bg-white/20'">
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer: ONLY Cancel Button -->
+  <footer class="z-30 p-12 flex justify-center mt-auto">
+    <button (click)="cancelSearch()" 
+      class="flex items-center space-x-3 bg-white/5 hover:bg-red-500/10 border border-white/10 hover:border-red-500/30 px-12 py-4 rounded-full transition-all active:scale-95 group">
+      <span class="material-icons text-white/60 group-hover:text-red-500 transition-colors">close</span>
+      <span class="font-bold text-white/80 group-hover:text-red-500 tracking-widest uppercase text-sm">Cancel Search</span>
+    </button>
+  </footer>
+
+</div>

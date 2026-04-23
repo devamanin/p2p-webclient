@@ -1,0 +1,281 @@
+<div class="h-screen w-full bg-[#0E0E11] flex flex-col relative overflow-hidden">
+  <!-- Top Bar -->
+  <header class="z-30 px-6 py-4 flex justify-between items-center shrink-0 transition-all duration-300">
+    <div class="flex items-center space-x-2">
+      <span class="text-[#69DAFF] material-icons text-3xl drop-shadow-[0_0_12px_rgba(105,218,255,0.8)]">blur_on</span>
+      <span class="font-space font-bold text-[22px] tracking-[2px] text-[#69DAFF] drop-shadow-[0_0_12px_rgba(105,218,255,0.8)]">blynq.app</span>
+    </div>
+    <div class="flex items-center space-x-3">
+      <div class="bg-white/5 border border-white/10 px-3 py-1.5 rounded-full flex items-center space-x-1.5">
+        <span class="text-amber-400 material-icons text-sm">monetization_on</span>
+        <span class="font-bold text-sm">{{ prefs.coins$ | async }}</span>
+      </div>
+      <button (click)="addFreeCoins()" class="bg-[#69DAFF]/10 hover:bg-[#69DAFF] text-[#69DAFF] hover:text-white border border-[#69DAFF]/30 px-3 py-1.5 rounded-full flex items-center space-x-1.5 transition-all active:scale-95" title="Get Free Coins">
+        <span class="material-icons text-[14px]">play_circle_filled</span>
+        <span class="text-[10px] font-black uppercase tracking-wider">Free</span>
+      </button>
+      <button (click)="toggleFullScreen()" class="text-white/50 hover:text-white transition-colors p-1" title="Toggle Fullscreen">
+        <span class="material-icons text-[20px]">{{ isFullScreen ? 'fullscreen_exit' : 'fullscreen' }}</span>
+      </button>
+      <button (click)="logout()" class="text-white/50 hover:text-white transition-colors p-1" title="Logout">
+        <span class="material-icons text-[20px]">logout</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 flex flex-row relative z-10 min-h-0">
+    <!-- Left Sidebar: User Profile -->
+    <aside *ngIf="!isFullScreen" class="hidden md:flex flex-col justify-center pl-6 pr-3 py-4 w-[220px] shrink-0 transition-all duration-300">
+      <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-[24px] p-4">
+        <div class="flex justify-center mb-3">
+          <div class="w-14 h-14 rounded-full bg-gradient-to-tr from-[#69DAFF] to-[#D674FF] p-[2px]">
+            <div class="w-full h-full rounded-full bg-[#0E0E11] flex items-center justify-center">
+              <span class="text-xl text-white/20 material-icons">person</span>
+            </div>
+          </div>
+        </div>
+        <h2 class="text-center text-sm font-black truncate mb-0.5">{{ prefs.name$ | async }}</h2>
+        <p class="text-center text-white/40 text-[10px] mb-3">{{ prefs.myGender$ | async }} • {{ prefs.age$ | async }} yrs</p>
+        <div class="w-full h-px bg-white/5 mb-3"></div>
+        <div class="space-y-2">
+          <div class="flex justify-between items-center px-2.5 py-2 rounded-lg bg-white/5">
+            <div class="flex items-center space-x-1.5 text-white/50">
+              <span class="material-icons text-[12px]">location_on</span>
+              <span class="text-[10px] font-medium">Location</span>
+            </div>
+            <span class="text-[10px] font-bold text-[#69DAFF] truncate max-w-[70px]">{{ prefs.detectedLocation || 'Unknown' }}</span>
+          </div>
+          <div class="flex justify-between items-center px-2.5 py-2 rounded-lg bg-white/5">
+            <div class="flex items-center space-x-1.5 text-white/50">
+              <span class="material-icons text-[12px]">badge</span>
+              <span class="text-[10px] font-medium">Gender</span>
+            </div>
+            <span class="text-[10px] font-bold text-white/70">{{ prefs.myGender$ | async }}</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Center: Video Panels -->
+    <div class="flex-1 flex items-center justify-center px-3 md:px-6 py-3 min-h-0">
+      <!-- Main Container with unified border and radius -->
+      <div class="flex flex-col md:flex-row w-full h-full rounded-2xl md:rounded-[32px] overflow-hidden border-2 transition-all duration-500 bg-[#16161D] min-h-0"
+        [ngClass]="{
+          'max-w-5xl': !isFullScreen,
+          'max-w-none': isFullScreen,
+          'border-white/10': state === 'idle' || (state === 'connected' && !isConnected),
+          'border-[#69DAFF]/40': state === 'searching',
+          'border-green-500/40': state === 'connected' && isConnected
+        }">
+        
+        <!-- Left: Your Video -->
+        <div class="flex-1 relative min-h-0 border-b-2 md:border-b-0 md:border-r-2 border-white/10 rounded-none">
+          <video #localPreview autoplay playsinline muted class="w-full h-full object-cover scale-x-[-1] rounded-none"></video>
+          
+          <!-- Watermark -->
+          <div class="absolute top-3 left-3 z-20 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 flex items-center justify-center">
+            <span class="font-space font-bold text-white/90 tracking-[2px] text-[11px] drop-shadow-md">blynq.app</span>
+          </div>
+
+          <div class="absolute bottom-2.5 left-2.5 bg-black/50 backdrop-blur-sm px-2.5 py-1 rounded-full flex items-center space-x-1.5 z-20">
+            <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+            <span class="text-[10px] font-bold text-white/80">You</span>
+          </div>
+          <div *ngIf="!localStream" class="absolute inset-0 flex flex-col items-center justify-center text-white/20 rounded-none z-10">
+            <span class="material-icons text-4xl mb-2">videocam_off</span>
+            <span class="text-[10px] font-medium">Camera off</span>
+          </div>
+        </div>
+
+        <!-- Right: Peer Panel (changes by state) -->
+        <div class="flex-1 relative min-h-0 bg-[#16161D] rounded-none">
+          
+          <!-- Remote video element (always present) -->
+          <video #remoteVideo autoplay playsinline class="w-full h-full object-cover rounded-none" 
+            [ngClass]="{'opacity-0': !isConnected}"></video>
+
+          <!-- IDLE state -->
+          <div *ngIf="state === 'idle'" class="absolute inset-0 flex flex-col items-center justify-center">
+            <div class="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-3">
+              <span class="material-icons text-3xl text-white/10">person_search</span>
+            </div>
+            <span class="text-[11px] font-medium text-white/20">Tap connect to start</span>
+          </div>
+
+          <!-- SEARCHING state -->
+          <div *ngIf="state === 'searching'" class="absolute inset-0 flex flex-col items-center justify-center overflow-hidden bg-black/60 backdrop-blur-sm z-10">
+            <!-- Radar Animation Container -->
+            <div class="relative w-40 h-40 md:w-56 md:h-56 mb-6 flex items-center justify-center">
+              <!-- Pulsing Rings -->
+              <div class="absolute w-full h-full border-2 border-[#69DAFF]/20 rounded-full animate-radar-ring-1"></div>
+              <div class="absolute w-[80%] h-[80%] border-2 border-[#69DAFF]/10 rounded-full animate-radar-ring-2"></div>
+              
+              <!-- Central Radar Core -->
+              <div class="relative z-10 w-20 h-20 md:w-28 md:h-28 bg-[#1F1F23]/80 backdrop-blur-md border-2 border-[#69DAFF] rounded-full shadow-[0_0_50px_rgba(105,218,255,0.3)] flex items-center justify-center">
+                <span class="material-icons text-4xl md:text-6xl text-[#69DAFF] animate-pulse">radar</span>
+              </div>
+            </div>
+
+            <!-- Finding Someone Text -->
+            <div class="h-8 flex items-center justify-center mb-4">
+              <h2 class="text-xl md:text-2xl font-space font-light tracking-tighter text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">
+                Finding someone<span class="inline-block w-8 text-left">{{ dots }}</span>
+              </h2>
+            </div>
+            
+            <p class="text-[10px] text-white/50 tracking-widest uppercase text-center max-w-[80%]">
+              {{ tips[tipIndex] }}
+            </p>
+          </div>
+
+          <!-- CONNECTED but loading -->
+          <div *ngIf="state === 'connected' && !isConnected" class="absolute inset-0 flex flex-col items-center justify-center">
+            <div class="w-12 h-12 border-4 border-t-[#69DAFF] border-gray-800 rounded-full animate-spin mb-2"></div>
+            <p class="text-xs font-bold text-white/40">Connecting...</p>
+          </div>
+
+          <!-- Label -->
+          <div class="absolute bottom-2.5 left-2.5 bg-black/50 backdrop-blur-sm px-2.5 py-1 rounded-full flex items-center space-x-1.5">
+            <div class="w-2 h-2 rounded-full" 
+              [ngClass]="isConnected ? 'bg-green-400 animate-pulse' : state === 'searching' ? 'bg-[#69DAFF] animate-pulse' : 'bg-white/20'"></div>
+            <span class="text-[10px] font-bold"
+              [ngClass]="isConnected ? 'text-white/80' : 'text-white/40'">
+              {{ isConnected ? (remoteMetadata?.name || 'Stranger') : state === 'searching' ? 'Finding...' : 'Stranger' }}
+            </span>
+          </div>
+
+          <!-- Peer info overlay when connected -->
+          <div *ngIf="remoteMetadata && isConnected" class="absolute top-2.5 left-2.5 bg-black/40 backdrop-blur-sm px-2.5 py-1 rounded-lg">
+            <span class="text-[10px] text-white/50">{{ remoteMetadata.location || '' }}</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Bottom Bar (changes by state) -->
+  <div class="z-30 px-4 pb-4 pt-2 shrink-0 transition-all duration-300">
+    
+    <!-- IDLE: Preferences + Connect -->
+    <div *ngIf="state === 'idle'" class="flex items-center justify-center gap-2.5">
+      <div class="flex items-center gap-2 overflow-x-auto no-scrollbar">
+        <div class="bg-white/5 border border-white/10 px-3 py-1.5 rounded-full flex items-center space-x-1.5 shrink-0">
+          <span class="material-icons text-[#D674FF] text-[12px]">favorite</span>
+          <span class="text-[10px] font-bold text-[#D674FF]">{{ prefs.targetGender$ | async }}</span>
+        </div>
+        <div class="bg-white/5 border border-white/10 px-3 py-1.5 rounded-full flex items-center space-x-1.5 shrink-0">
+          <span class="material-icons text-[#69DAFF] text-[12px]">location_on</span>
+          <span class="text-[10px] font-bold text-[#69DAFF] truncate max-w-[70px]">{{ (prefs.locations$ | async)?.join(', ') || 'Global' }}</span>
+        </div>
+        <button (click)="toggleFilters()" class="bg-white/5 border border-white/10 px-3 py-1.5 rounded-full flex items-center space-x-1.5 shrink-0 hover:bg-white/10 transition-all active:scale-95">
+          <span class="material-icons text-white/40 text-[12px]">tune</span>
+          <span class="text-[10px] font-bold text-white/40">Edit</span>
+        </button>
+      </div>
+      <button (click)="toggleFullScreen()" class="bg-white/5 border border-white/10 px-3 py-1.5 rounded-full flex items-center space-x-1.5 shrink-0 hover:bg-white/10 transition-all active:scale-95" title="Toggle Fullscreen">
+        <span class="material-icons text-white/40 text-[16px]">{{ isFullScreen ? 'fullscreen_exit' : 'fullscreen' }}</span>
+      </button>
+      <button (click)="startMatching()" 
+        class="bg-gradient-to-r from-[#69DAFF] to-[#00A3FF] hover:brightness-110 px-5 py-2 rounded-full flex items-center space-x-2 shadow-lg shadow-cyan-500/20 transition-all active:scale-95 shrink-0">
+        <span class="material-icons text-white text-lg">videocam</span>
+        <span class="font-black text-sm text-white uppercase tracking-wider">Connect</span>
+      </button>
+    </div>
+
+    <!-- SEARCHING: Tip + Cancel -->
+    <div *ngIf="state === 'searching'" class="flex items-center justify-center gap-3">
+      <div class="hidden sm:flex items-center bg-white/5 border border-white/10 rounded-full px-3 py-1.5 space-x-2 max-w-xs">
+        <span class="material-icons text-[#D674FF] text-[12px] shrink-0">lightbulb</span>
+        <p class="text-[10px] text-white/50 truncate">{{ tips[tipIndex] }}</p>
+      </div>
+      <button (click)="cancelSearch()" 
+        class="flex items-center space-x-2 bg-white/5 hover:bg-white/10 border border-white/10 px-5 py-2 rounded-full transition-all active:scale-95 shrink-0">
+        <span class="material-icons text-red-400 text-lg">close</span>
+        <span class="font-bold text-sm text-red-400">Cancel</span>
+      </button>
+    </div>
+
+    <!-- CONNECTED: Call controls -->
+    <div *ngIf="state === 'connected'" class="flex items-center justify-center">
+      <div class="flex items-center space-x-2.5 px-4 py-2.5 bg-black/60 backdrop-blur-2xl rounded-full border border-white/15 shadow-2xl">
+        <button (click)="toggleMute()" class="w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 active:scale-90" 
+          [ngClass]="isMuted ? 'bg-red-500 text-white' : 'bg-white/10 text-white hover:bg-white/15'">
+          <span class="material-icons text-[18px]">{{ isMuted ? 'mic_off' : 'mic' }}</span>
+        </button>
+        <button (click)="handleEnd()" class="w-11 h-11 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white transition-all duration-200 active:scale-90">
+          <span class="material-icons text-[18px]">call_end</span>
+        </button>
+        <button (click)="handleNext()" class="h-11 bg-gradient-to-r from-[#69DAFF] to-[#00A3FF] hover:brightness-110 px-4 rounded-full flex items-center space-x-1.5 text-white transition-all duration-200 active:scale-95 shadow-lg shadow-cyan-500/20">
+          <span class="material-icons text-[18px]">skip_next</span>
+          <span class="text-[11px] font-black uppercase tracking-wider">Next</span>
+        </button>
+        <button (click)="toggleFullScreen()" class="w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 active:scale-90 bg-white/10 text-white hover:bg-white/15" title="Toggle Fullscreen">
+          <span class="material-icons text-[18px]">{{ isFullScreen ? 'fullscreen_exit' : 'fullscreen' }}</span>
+        </button>
+        <button (click)="toggleCamera()" class="w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 active:scale-90"
+          [ngClass]="isCameraOff ? 'bg-red-500 text-white' : 'bg-white/10 text-white hover:bg-white/15'">
+          <span class="material-icons text-[18px]">{{ isCameraOff ? 'videocam_off' : 'videocam' }}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- Filters Modal -->
+  <div *ngIf="showFilters" class="fixed inset-0 z-50 flex items-end justify-center bg-black/80 backdrop-blur-md sm:items-center">
+    <div class="w-full sm:w-96 max-h-[90vh] overflow-y-auto bg-[#1A1A24] sm:rounded-[40px] rounded-t-[40px] border border-white/10 p-6 flex flex-col shadow-[0_-10px_50px_rgba(0,0,0,0.5)] relative">
+      <button (click)="toggleFilters()" class="absolute top-6 right-6 text-white/50 hover:text-white">
+        <span class="material-icons">close</span>
+      </button>
+
+      <h2 class="text-2xl font-black mb-6">Preferences</h2>
+
+      <div class="mb-6">
+        <h3 class="text-xs font-bold text-white/50 uppercase tracking-widest mb-3">I am</h3>
+        <div class="flex flex-wrap gap-2">
+          <button *ngFor="let g of selfGenders" (click)="setMyGender(g)"
+            [ngClass]="currentMyGender === g ? 'bg-[#69DAFF] text-black border-[#69DAFF]' : 'bg-white/5 text-white border-white/10 hover:bg-white/10'"
+            class="px-4 py-2 rounded-full border text-sm font-bold transition-all">{{ g }}</button>
+        </div>
+      </div>
+
+      <div class="mb-6">
+        <h3 class="text-xs font-bold text-white/50 uppercase tracking-widest mb-3">Interested In</h3>
+        <div class="flex flex-wrap gap-2">
+          <button *ngFor="let g of genders" (click)="setTargetGender(g)"
+            [ngClass]="currentTargetGender === g ? 'bg-[#D674FF] text-white border-[#D674FF]' : 'bg-white/5 text-white border-white/10 hover:bg-white/10'"
+            class="px-4 py-2 rounded-full border text-sm font-bold transition-all">{{ g }}</button>
+        </div>
+      </div>
+
+      <div class="mb-6">
+        <h3 class="text-xs font-bold text-white/50 uppercase tracking-widest mb-3">Interests (Max 5)</h3>
+        <div class="flex flex-wrap gap-2">
+          <button *ngFor="let i of availableInterests" (click)="toggleInterest(i)"
+            [ngClass]="currentInterests.includes(i) ? 'bg-[#69DAFF]/20 text-[#69DAFF] border-[#69DAFF]/50' : 'bg-white/5 text-white border-white/10 hover:bg-white/10'"
+            class="px-4 py-2 rounded-full border text-sm font-bold transition-all">{{ i }}</button>
+        </div>
+      </div>
+
+      <div class="mb-8">
+        <h3 class="text-xs font-bold text-white/50 uppercase tracking-widest mb-3">Locations (Max 3)</h3>
+        <div class="flex flex-wrap gap-2">
+          <button *ngFor="let l of availableLocations" (click)="toggleLocation(l)"
+            [ngClass]="currentLocations.includes(l) ? 'bg-[#69DAFF]/20 text-[#69DAFF] border-[#69DAFF]/50' : 'bg-white/5 text-white border-white/10 hover:bg-white/10'"
+            class="px-4 py-2 rounded-full border text-sm font-bold transition-all">{{ l }}</button>
+        </div>
+      </div>
+
+      <button (click)="toggleFilters()" class="w-full py-4 rounded-full bg-gradient-to-r from-[#69DAFF] to-[#D674FF] text-white font-black uppercase tracking-widest hover:scale-[1.02] transition-transform active:scale-95 shadow-lg mt-auto">
+        Save & Apply
+      </button>
+    </div>
+  </div>
+
+  <!-- Background Glow -->
+  <div class="absolute top-1/4 left-1/4 w-32 h-32 bg-[#69DAFF] rounded-full blur-[120px] opacity-10 animate-pulse pointer-events-none"></div>
+  <div class="absolute bottom-1/4 right-1/4 w-64 h-64 bg-[#D674FF] rounded-full blur-[150px] opacity-10 animate-pulse pointer-events-none"></div>
+</div>

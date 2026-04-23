@@ -1,0 +1,10 @@
+<svg viewBox="0 0 100 142" xmlns="http://www.w3.org/2000/svg">
+  <!-- 4 Dots -->
+  <circle cx="50" cy="25" r="12" fill="#2188ff" />
+  <circle cx="25" cy="50" r="12" fill="#2188ff" />
+  <circle cx="75" cy="50" r="12" fill="#2188ff" />
+  <circle cx="50" cy="75" r="12" fill="#2188ff" />
+  
+  <!-- Checkmark -->
+  <path d="M 25,100 L 45,120 L 80,85" fill="none" stroke="#2188ff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" />
+</svg>
