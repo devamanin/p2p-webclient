@@ -9,7 +9,7 @@ export class UserPreferencesService {
   private _targetGenderSubject = new BehaviorSubject<string>(localStorage.getItem('targetGender') || 'Any Gender');
   private _myGenderSubject = new BehaviorSubject<string>(localStorage.getItem('myGender') || 'Male');
   private _ageSubject = new BehaviorSubject<number>(parseInt(localStorage.getItem('age') || '18'));
-  private _coinsSubject = new BehaviorSubject<number>(parseInt(localStorage.getItem('coins') || '0'));
+  private _coinsSubject = new BehaviorSubject<number>(parseInt(localStorage.getItem('coins') || '200'));
   private _detectedLocationSubject = new BehaviorSubject<string>(localStorage.getItem('detectedLocation') || 'Global');
   private _interestsSubject = new BehaviorSubject<string[]>(JSON.parse(localStorage.getItem('interests') || '["Gaming", "Movies", "Fitness"]'));
   private _locationsSubject = new BehaviorSubject<string[]>(JSON.parse(localStorage.getItem('locations') || '["Global"]'));

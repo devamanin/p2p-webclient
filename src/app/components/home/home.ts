@@ -171,8 +171,8 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.coinCost = this.calculateCost();
     if (this.prefs.coins < this.coinCost) {
-      console.warn(`[Home] Insufficient coins (${this.prefs.coins}). Auto-granting 100 coins for testing.`);
-      this.prefs.addCoins(100);
+      console.warn(`[Home] Insufficient coins (${this.prefs.coins}). Auto-granting 200 coins for testing.`);
+      this.prefs.addCoins(200);
     }
 
     this.state = 'searching';
