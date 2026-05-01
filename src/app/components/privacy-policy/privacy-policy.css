@@ -1,0 +1,5 @@
+/* Custom styles for privacy policy page */
+.prose h2 {
+    border-left: 4px solid #3b82f6;
+    padding-left: 1rem;
+}
