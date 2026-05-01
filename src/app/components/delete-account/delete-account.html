@@ -1,0 +1,42 @@
+<div class="min-h-screen flex flex-col items-center justify-center p-6 text-center">
+  <div class="max-w-md w-full bg-[#0a0a0c] border border-white/10 rounded-3xl p-8 shadow-2xl">
+    <!-- Icon -->
+    <div class="w-16 h-16 bg-red-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+      <span class="material-icons text-red-500 text-3xl">delete_forever</span>
+    </div>
+
+    <h1 class="text-3xl font-bold mb-4 tracking-tight">Delete Account</h1>
+    <p class="text-white/60 mb-8 leading-relaxed">
+      We're sorry to see you go. If you delete your account, all your data, including profile info, friends, and chat history, will be permanently removed.
+    </p>
+
+    <div class="space-y-6 text-left">
+      <!-- Option 1: In-App -->
+      <div class="bg-white/5 rounded-2xl p-4 border border-white/5">
+        <h2 class="text-sm font-semibold text-white/40 uppercase tracking-wider mb-2">Option 1: In the App</h2>
+        <p class="text-sm">
+          Open the <strong>Blynq</strong> app, go to your <strong>Profile</strong>, and tap <strong>Delete Account</strong> at the bottom.
+        </p>
+      </div>
+
+      <!-- Option 2: Email -->
+      <div class="bg-white/5 rounded-2xl p-4 border border-white/5">
+        <h2 class="text-sm font-semibold text-white/40 uppercase tracking-wider mb-2">Option 2: Manual Request</h2>
+        <p class="text-sm mb-3">
+          If you no longer have the app installed, send an email to our support team.
+        </p>
+        <a href="mailto:support@blynq.app?subject=Account Deletion Request" 
+           class="inline-flex items-center text-blue-400 hover:text-blue-300 transition-colors font-medium">
+          <span class="material-icons text-sm mr-2">mail</span>
+          support@blynq.app
+        </a>
+      </div>
+    </div>
+
+    <div class="mt-10 pt-6 border-t border-white/5">
+      <a routerLink="/" class="text-sm text-white/40 hover:text-white transition-colors">
+        Back to Home
+      </a>
+    </div>
+  </div>
+</div>
