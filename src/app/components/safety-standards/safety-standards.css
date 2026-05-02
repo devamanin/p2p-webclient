@@ -1,0 +1,15 @@
+.prose h2 {
+  @apply text-xl font-semibold text-white mb-4 mt-8;
+}
+
+.prose h3 {
+  @apply text-lg font-medium text-white/90 mb-2 mt-6;
+}
+
+.prose p {
+  @apply mb-4;
+}
+
+.prose ul {
+  @apply list-disc pl-5 mb-4 space-y-1;
+}
