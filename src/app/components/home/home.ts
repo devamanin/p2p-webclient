@@ -1,28 +1,34 @@
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewInit, NgZone, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
 import { UserPreferencesService } from '../../services/user-preferences.service';
 import { AuthService } from '../../services/auth.service';
 import { SignalingService } from '../../services/signaling.service';
+import { FriendService, Friend, FriendRequest } from '../../services/friend.service';
+import { ChatService, ChatPreview, ChatMessage } from '../../services/chat.service';
 import { Subscription } from 'rxjs';
 
 // States: 'idle' | 'searching' | 'connected'
 type AppState = 'idle' | 'searching' | 'connected';
+type FriendStatus = 'none' | 'sent' | 'received' | 'friends';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './home.html',
   styleUrl: './home.css'
 })
 export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('localPreview') localPreview!: ElementRef<HTMLVideoElement>;
   @ViewChild('remoteVideo') remoteVideo!: ElementRef<HTMLVideoElement>;
+  @ViewChild('chatScroll') chatScroll!: ElementRef<HTMLDivElement>;
 
   // UI state
   public state: AppState = 'idle';
   public showFilters = false;
+  public isEditingProfile = false;
   public localStream: MediaStream | null = null;
   public isConnected = false;
   public isMuted = false;
@@ -31,6 +37,28 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   public remoteMetadata: any = null;
   public dots = '';
   private dotsTimer: any = null;
+
+  // Friend logic
+  public friendStatus: FriendStatus = 'none';
+
+  // In-call Chat
+  public isInCallChatOpen = false;
+  public inCallMessages: {sender: 'me' | 'peer', text: string}[] = [];
+  public inCallChatInput = '';
+  public hasUnreadInCallMessages = false;
+
+  // Social panel
+  public showSocialPanel = false;
+  public socialTab: 'chats' | 'friends' | 'requests' = 'chats';
+  public friends: Friend[] = [];
+  public pendingRequests: FriendRequest[] = [];
+  public activeChats: ChatPreview[] = [];
+  public showAddFriendDialog = false;
+  public addFriendUid = '';
+  public addFriendStatus = '';
+  public activeChatFriend: { uid: string; name: string; photoUrl?: string } | null = null;
+  public chatMessages: ChatMessage[] = [];
+  public chatInput = '';
 
   // Matching
   public tipIndex = 0;
@@ -46,6 +74,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   public availableInterests = ['Gaming', 'Movies', 'Fitness', 'Music', 'Travel', 'Art', 'Tech'];
   public availableLocations = ['Global', 'India', 'USA', 'UK', 'Australia', 'Canada', 'Europe'];
   public currentMyGender = 'Male';
+  public currentAge = 18;
   public currentTargetGender = 'Any Gender';
   public currentInterests: string[] = [];
   public currentLocations: string[] = ['Global'];
@@ -55,27 +84,53 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   private matchRetryTimeout: any = null;
   private isSearching = false;
   private coinCost = 10;
+  private searchNonce = 0;
 
   constructor(
     public prefs: UserPreferencesService,
     private authService: AuthService,
     private signalingService: SignalingService,
+    private friendService: FriendService,
+    private chatService: ChatService,
     private router: Router,
     private ngZone: NgZone,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
-    this.authService.user$.subscribe(user => {
-      if (user) {
-        this.prefs.setName(user.displayName || 'User');
-      }
-    });
+    this.subscriptions.push(
+      this.authService.user$.subscribe(user => {
+        console.log('[Home] Auth User:', user ? user.email : 'No user');
+        if (user) {
+          if (user.displayName) {
+            this.prefs.setName(user.displayName);
+          }
+          if (user.photoURL) {
+            console.log('[Home] Setting Profile Picture:', user.photoURL);
+            this.prefs.setProfilePicture(user.photoURL);
+          }
+          this.cdr.detectChanges();
 
+          this.friendService.syncUserProfile(
+            this.prefs.name,
+            this.prefs.profilePicture || '',
+            this.prefs.age,
+            this.prefs.myGender,
+            this.prefs.detectedLocation
+          );
+        }
+      })
+    );
+
+    // Initial load from prefs
     this.currentMyGender = this.prefs.myGender;
+    this.currentAge = this.prefs.age;
     this.currentTargetGender = this.prefs.targetGender;
     this.currentInterests = [...this.prefs.interests];
     this.currentLocations = [...this.prefs.locations];
+
+    // Load social data once
+    this.loadSocialData();
   }
 
   async ngAfterViewInit() {
@@ -129,6 +184,12 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
               this.remoteVideo.nativeElement.play().catch(() => {});
             }
             this.cdr.detectChanges();
+          } else {
+            console.log('[Home] Remote stream cleared');
+            if (this.remoteVideo?.nativeElement) {
+              this.remoteVideo.nativeElement.srcObject = null;
+            }
+            this.cdr.detectChanges();
           }
         });
       })
@@ -138,12 +199,26 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     this.subscriptions.push(
       this.signalingService.sessionEnded$.subscribe(() => {
         this.ngZone.run(() => {
-          console.log('[Home] Session ended');
+          console.log('[Home] Session ended by remote peer');
+          this.friendStatus = 'none'; // Reset friend status on disconnect
           if (this.state === 'connected') {
             this.signalingService.hangUp().then(() => {
               if (this.isConnected) {
-                console.log('[Home] Call ended, returning to idle.');
-                this.resetToIdle();
+                console.log('[Home] Partner disconnected, automatically finding next match...');
+                this.stopMatchingTimers();
+                this.isConnected = false;
+                this.remoteMetadata = null;
+                this.isMuted = false;
+                this.isCameraOff = false;
+                this.friendStatus = 'none';
+                this.inCallMessages = [];
+                this.inCallChatInput = '';
+                this.isInCallChatOpen = false;
+                this.hasUnreadInCallMessages = false;
+                this.isSearching = false;
+                
+                this.state = 'idle';
+                this.startMatching();
               } else {
                 console.log('[Home] Partner dropped during connection, resuming search...');
                 this.state = 'searching';
@@ -160,6 +235,35 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
             });
           }
         });
+      })
+    );
+
+    // Messages (for system friend requests and in-call chat)
+    this.subscriptions.push(
+      this.signalingService.message$.subscribe(msg => {
+        if (!msg) return;
+        
+        if (msg === 'SYS:FRIEND_REQUEST') {
+          this.ngZone.run(() => {
+            if (this.friendStatus === 'none') {
+              this.friendStatus = 'received';
+            }
+          });
+        } else if (msg === 'SYS:FRIEND_ACCEPTED') {
+          this.ngZone.run(() => {
+            this.friendStatus = 'friends';
+          });
+        } else {
+          // Regular text message
+          this.ngZone.run(() => {
+            this.inCallMessages.push({ sender: 'peer', text: msg });
+            if (!this.isInCallChatOpen) {
+              this.hasUnreadInCallMessages = true;
+            }
+            this.scrollToBottom();
+            this.cdr.detectChanges();
+          });
+        }
       })
     );
   }
@@ -179,6 +283,8 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isConnected = false;
     this.remoteMetadata = null;
     this.signalingService.isMatched = false;
+    this.searchNonce++;
+    const myNonce = this.searchNonce;
 
     // Start dots animation
     let count = 0;
@@ -195,11 +301,19 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Get audio+video for WebRTC
     try {
-      await this.signalingService.openUserMedia();
+      this.localStream = await this.signalingService.openUserMedia();
+      if (this.localPreview && this.localPreview.nativeElement) {
+        if (this.localPreview.nativeElement.srcObject !== this.localStream) {
+          this.localPreview.nativeElement.srcObject = this.localStream;
+          this.localPreview.nativeElement.muted = true;
+          this.localPreview.nativeElement.play().catch(() => {});
+        }
+      }
+      if (this.searchNonce !== myNonce) return;
       this.cdr.detectChanges(); // Ensure UI updates to searching state
     } catch (e) {
       alert('Camera and microphone access are required.');
-      this.resetToIdle();
+      if (this.searchNonce === myNonce) this.resetToIdle();
       return;
     }
 
@@ -213,16 +327,17 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.matchRetryTimeout) {
       clearTimeout(this.matchRetryTimeout);
     }
+    const myNonce = this.searchNonce;
     this.matchRetryTimeout = setTimeout(() => {
       this.matchRetryTimeout = null;
-      if (this.state === 'searching') {
-        this.performMatchmaking();
+      if (this.state === 'searching' && this.searchNonce === myNonce) {
+        this.performMatchmaking(myNonce);
       }
     }, delayMs);
   }
 
-  private async performMatchmaking() {
-    if (this.isSearching || this.state !== 'searching') return;
+  private async performMatchmaking(myNonce: number) {
+    if (this.isSearching || this.state !== 'searching' || this.signalingService.isNegotiating || this.searchNonce !== myNonce) return;
 
     // Already matched
     if (this.signalingService.roomId && this.signalingService.remoteMetadata) {
@@ -232,26 +347,28 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.isSearching = true;
     const metadata = {
+      uid: this.authService.currentUser?.uid,
       myGender: this.prefs.myGender,
-      targetGender: this.prefs.targetGender,
+      age: this.prefs.age,
       interests: this.prefs.interests,
       locations: this.prefs.locations,
       name: this.prefs.name,
-      location: this.prefs.detectedLocation
+      location: this.prefs.detectedLocation,
+      targetGender: this.prefs.targetGender
     };
 
     try {
       const availableRoom = await this.signalingService.findAvailableRoom(metadata);
-      if (this.state !== 'searching') return;
+      if (this.state !== 'searching' || this.searchNonce !== myNonce) return;
 
       if (availableRoom) {
         if (this.signalingService.roomId) {
           await this.signalingService.stopWaiting();
         }
-        if (this.state !== 'searching') return;
+        if (this.state !== 'searching' || this.searchNonce !== myNonce) return;
 
         const success = await this.signalingService.joinRoom(availableRoom, metadata);
-        if (this.state !== 'searching') return;
+        if (this.state !== 'searching' || this.searchNonce !== myNonce) return;
 
         if (success) {
           this.onMatched();
@@ -267,10 +384,12 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     } catch (e) {
       console.error('[Home] Search error:', e);
     } finally {
-      this.isSearching = false;
-      if (this.state === 'searching') {
-        const nextDelay = 6000 + Math.floor(Math.random() * 4000);
-        this.scheduleMatchmaking(nextDelay);
+      if (this.searchNonce === myNonce) {
+        this.isSearching = false;
+        if (this.state === 'searching') {
+          const nextDelay = 6000 + Math.floor(Math.random() * 4000);
+          this.scheduleMatchmaking(nextDelay);
+        }
       }
     }
   }
@@ -278,11 +397,82 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   private onMatched() {
     console.log('[Home] *** MATCH FOUND ***');
     this.state = 'connected';
+    this.friendStatus = 'none'; // Reset for new match
+    this.inCallMessages = []; // Reset in-call chat
+    this.inCallChatInput = '';
+    this.isInCallChatOpen = false;
+    this.hasUnreadInCallMessages = false;
     this.signalingService.isMatched = true;
     this.remoteMetadata = this.signalingService.remoteMetadata;
     this.prefs.spendCoins(this.coinCost);
     this.stopMatchingTimers();
     this.cdr.detectChanges();
+  }
+
+  toggleInCallChat() {
+    this.isInCallChatOpen = !this.isInCallChatOpen;
+    if (this.isInCallChatOpen) {
+      this.hasUnreadInCallMessages = false;
+    }
+  }
+
+  private scrollToBottom() {
+    setTimeout(() => {
+      if (this.chatScroll && this.chatScroll.nativeElement) {
+        this.chatScroll.nativeElement.scrollTop = this.chatScroll.nativeElement.scrollHeight;
+      }
+    }, 50);
+  }
+
+  sendInCallMessage() {
+    if (!this.inCallChatInput.trim() || !this.isConnected) return;
+    
+    const text = this.inCallChatInput.trim();
+    this.inCallChatInput = '';
+    
+    // Add to local UI
+    this.inCallMessages.push({ sender: 'me', text });
+    
+    // Send via socket
+    this.signalingService.sendMessage(text);
+    this.scrollToBottom();
+  }
+
+  async handleFriendAction() {
+    if (!this.remoteMetadata?.uid) return;
+
+    if (this.friendStatus === 'none') {
+      try {
+        await this.friendService.sendFriendRequest(this.remoteMetadata.uid);
+        this.friendStatus = 'sent';
+        this.signalingService.sendMessage('SYS:FRIEND_REQUEST');
+      } catch (e) {
+        console.error('Error sending friend request:', e);
+      }
+    } else if (this.friendStatus === 'received') {
+      try {
+        // We need to find the request ID. This is a bit simplified here.
+        // In a real app, you might want to fetch the request ID from firestore first.
+        // For now, we'll just send the acceptance signal.
+        this.signalingService.sendMessage('SYS:FRIEND_ACCEPTED');
+        this.friendStatus = 'friends';
+        
+        // Find the pending request to accept it in Firestore
+        const requests = await new Promise<FriendRequest[]>((resolve) => {
+          const sub = this.friendService.getPendingRequests().subscribe(reqs => {
+            sub.unsubscribe();
+            resolve(reqs);
+          });
+        });
+        
+        const req = requests.find(r => r.fromUid === this.remoteMetadata.uid);
+        if (req) {
+          await this.friendService.acceptFriendRequest(req.id, req.fromUid);
+        }
+      } catch (e) {
+        console.error('Error accepting friend request:', e);
+      }
+    }
   }
 
   cancelSearch() {
@@ -319,6 +509,12 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
         this.remoteMetadata = null;
         this.isMuted = false;
         this.isCameraOff = false;
+        this.friendStatus = 'none';
+        this.inCallMessages = [];
+        this.inCallChatInput = '';
+        this.isInCallChatOpen = false;
+        this.hasUnreadInCallMessages = false;
+        this.isSearching = false;
         
         // Immediately start searching without showing the idle screen
         this.state = 'idle'; // Reset state temporarily so startMatching passes its check
@@ -341,6 +537,11 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     this.remoteMetadata = null;
     this.isMuted = false;
     this.isCameraOff = false;
+    this.friendStatus = 'none';
+    this.inCallMessages = [];
+    this.inCallChatInput = '';
+    this.isInCallChatOpen = false;
+    this.hasUnreadInCallMessages = false;
     this.stopMatchingTimers();
     this.cdr.detectChanges();
   }
@@ -365,15 +566,53 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  toggleFilters() {
-    this.showFilters = !this.showFilters;
-    if (!this.showFilters) {
+  toggleProfileEdit() {
+    this.isEditingProfile = !this.isEditingProfile;
+    if (this.isEditingProfile) {
+      this.currentAge = this.prefs.age;
+      this.currentMyGender = this.prefs.myGender;
+    } else {
+      this.prefs.setAge(this.currentAge);
       this.prefs.setMyGender(this.currentMyGender);
+    }
+  }
+
+  openFilters() {
+    this.currentMyGender = this.prefs.myGender;
+    this.currentAge = this.prefs.age;
+    this.currentTargetGender = this.prefs.targetGender;
+    this.currentInterests = [...this.prefs.interests];
+    this.currentLocations = [...this.prefs.locations];
+    this.showFilters = true;
+    this.cdr.detectChanges();
+  }
+
+  closeFilters(save: boolean) {
+    if (save) {
+      console.log('[Home] Saving Preferences:', {
+        gender: this.currentMyGender,
+        age: this.currentAge,
+        target: this.currentTargetGender,
+        interests: this.currentInterests,
+        locations: this.currentLocations
+      });
+      this.prefs.setMyGender(this.currentMyGender);
+      this.prefs.setAge(this.currentAge);
       this.prefs.setTargetGender(this.currentTargetGender);
       this.prefs.setInterests(this.currentInterests);
       if (this.currentLocations.length === 0) this.currentLocations = ['Global'];
       this.prefs.setLocations(this.currentLocations);
+
+      this.friendService.syncUserProfile(
+        this.prefs.name,
+        this.prefs.profilePicture || '',
+        this.prefs.age,
+        this.prefs.myGender,
+        this.prefs.detectedLocation
+      );
     }
+    this.showFilters = false;
+    this.cdr.detectChanges();
   }
 
   setMyGender(g: string) { this.currentMyGender = g; }
@@ -409,6 +648,121 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   addFreeCoins() { alert('You earned 50 coins!'); this.prefs.addCoins(50); }
 
   logout() { this.authService.logout().then(() => this.router.navigate(['/'])); }
+
+  // ─── SOCIAL PANEL ───
+
+  toggleSocialPanel() {
+    this.showSocialPanel = !this.showSocialPanel;
+    if (!this.showSocialPanel) {
+      this.activeChatFriend = null;
+    }
+  }
+
+  setSocialTab(tab: 'chats' | 'friends' | 'requests') {
+    this.socialTab = tab;
+    this.activeChatFriend = null;
+  }
+
+  private loadSocialData() {
+    this.subscriptions.push(
+      this.friendService.getFriends().subscribe(f => {
+        this.ngZone.run(() => { this.friends = f; this.cdr.detectChanges(); });
+      })
+    );
+    this.subscriptions.push(
+      this.friendService.getPendingRequests().subscribe(r => {
+        this.ngZone.run(() => { this.pendingRequests = r; this.cdr.detectChanges(); });
+      })
+    );
+    this.subscriptions.push(
+      this.chatService.getActiveChats().subscribe(c => {
+        this.ngZone.run(() => { this.activeChats = c; this.cdr.detectChanges(); });
+      })
+    );
+  }
+
+  openAddFriendDialog() {
+    this.addFriendUid = '';
+    this.addFriendStatus = '';
+    this.showAddFriendDialog = true;
+  }
+
+  async sendFriendRequest() {
+    if (!this.addFriendUid.trim()) return;
+    this.addFriendStatus = 'Sending...';
+    try {
+      await this.friendService.sendFriendRequest(this.addFriendUid.trim());
+      this.addFriendStatus = 'Request sent!';
+      setTimeout(() => { this.showAddFriendDialog = false; this.cdr.detectChanges(); }, 1500);
+    } catch (e: any) {
+      this.addFriendStatus = e.message || 'Error sending request';
+    }
+    this.cdr.detectChanges();
+  }
+
+  async acceptRequest(req: FriendRequest) {
+    try {
+      await this.friendService.acceptFriendRequest(req.id, req.fromUid);
+    } catch (e) {
+      console.error('Error accepting request:', e);
+    }
+  }
+
+  async rejectRequest(req: FriendRequest) {
+    try {
+      await this.friendService.rejectFriendRequest(req.id);
+    } catch (e) {
+      console.error('Error rejecting request:', e);
+    }
+  }
+
+  openChat(friendUid: string, friendName: string, friendPhotoUrl?: string) {
+    this.activeChatFriend = { uid: friendUid, name: friendName, photoUrl: friendPhotoUrl };
+    this.chatMessages = [];
+    this.chatInput = '';
+    this.subscriptions.push(
+      this.chatService.getMessages(friendUid).subscribe(msgs => {
+        this.ngZone.run(() => { this.chatMessages = msgs; this.cdr.detectChanges(); });
+      })
+    );
+  }
+
+  async sendChatMessage() {
+    if (!this.chatInput.trim() || !this.activeChatFriend) return;
+    const text = this.chatInput.trim();
+    this.chatInput = '';
+    try {
+      await this.chatService.sendMessage(this.activeChatFriend.uid, text);
+    } catch (e) {
+      console.error('Error sending message:', e);
+    }
+  }
+
+  formatChatTime(date: Date | null): string {
+    if (!date) return '';
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+
+  isMyMessage(msg: ChatMessage): boolean {
+    return msg.senderId === this.authService.currentUser?.uid;
+  }
+
+  async promptDeleteAccount() {
+    const confirmed = window.confirm("Are you sure you want to permanently delete your account? This action cannot be undone.");
+    if (confirmed) {
+      try {
+        await this.authService.deleteAccount();
+        this.router.navigate(['/']);
+      } catch (e: any) {
+        if (e.code === 'auth/requires-recent-login') {
+          alert('For security reasons, please log out and log back in before deleting your account.');
+        } else {
+          alert('Failed to delete account. Please try again later.');
+          console.error(e);
+        }
+      }
+    }
+  }
 
   ngOnDestroy() {
     this.stopMatchingTimers();

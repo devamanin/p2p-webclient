@@ -1,69 +1,95 @@
 <div class="h-screen w-full bg-[#0E0E11] flex flex-col relative overflow-hidden">
-  <!-- Top Bar -->
-  <header class="z-30 px-6 py-4 flex justify-between items-center shrink-0 transition-all duration-300">
-    <div class="flex items-center space-x-2">
-      <span class="text-[#69DAFF] material-icons text-3xl drop-shadow-[0_0_12px_rgba(105,218,255,0.8)]">blur_on</span>
-      <span class="font-space font-bold text-[22px] tracking-[2px] text-[#69DAFF] drop-shadow-[0_0_12px_rgba(105,218,255,0.8)]">blynq.app</span>
-    </div>
-    <div class="flex items-center space-x-3">
-      <div class="bg-white/5 border border-white/10 px-3 py-1.5 rounded-full flex items-center space-x-1.5">
-        <span class="text-amber-400 material-icons text-sm">monetization_on</span>
-        <span class="font-bold text-sm">{{ prefs.coins$ | async }}</span>
-      </div>
-      <button (click)="addFreeCoins()" class="bg-[#69DAFF]/10 hover:bg-[#69DAFF] text-[#69DAFF] hover:text-white border border-[#69DAFF]/30 px-3 py-1.5 rounded-full flex items-center space-x-1.5 transition-all active:scale-95" title="Get Free Coins">
-        <span class="material-icons text-[14px]">play_circle_filled</span>
-        <span class="text-[10px] font-black uppercase tracking-wider">Free</span>
-      </button>
-      <button (click)="toggleFullScreen()" class="text-white/50 hover:text-white transition-colors p-1" title="Toggle Fullscreen">
-        <span class="material-icons text-[20px]">{{ isFullScreen ? 'fullscreen_exit' : 'fullscreen' }}</span>
-      </button>
-      <button (click)="logout()" class="text-white/50 hover:text-white transition-colors p-1" title="Logout">
-        <span class="material-icons text-[20px]">logout</span>
-      </button>
-    </div>
-  </header>
-
   <!-- Main Content -->
   <main class="flex-1 flex flex-row relative z-10 min-h-0">
-    <!-- Left Sidebar: User Profile -->
-    <aside *ngIf="!isFullScreen" class="hidden md:flex flex-col justify-center pl-6 pr-3 py-4 w-[220px] shrink-0 transition-all duration-300">
-      <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-[24px] p-4">
+    <!-- Left Sidebar: User Profile & Nav -->
+    <aside *ngIf="!isFullScreen" class="flex flex-col pl-3 md:pl-6 pr-2 md:pr-3 py-3 md:py-4 w-[190px] md:w-[260px] shrink-0 transition-all duration-300 h-full">
+      <div class="bg-[#16161D] border border-white/10 rounded-[20px] md:rounded-[32px] p-4 md:p-6 flex flex-col h-full w-full overflow-y-auto no-scrollbar shadow-2xl">
+        
+        <!-- App Logo -->
+        <div class="flex items-center justify-center space-x-2 mb-6 mt-2">
+          <span class="text-[#69DAFF] material-icons text-2xl md:text-3xl drop-shadow-[0_0_12px_rgba(105,218,255,0.8)]">blur_on</span>
+          <span class="font-space font-bold text-[18px] md:text-[22px] tracking-[2px] text-[#69DAFF] drop-shadow-[0_0_12px_rgba(105,218,255,0.8)]">blynq.app</span>
+        </div>
+
+        <!-- Profile Section -->
         <div class="flex justify-center mb-3">
-          <div class="w-14 h-14 rounded-full bg-gradient-to-tr from-[#69DAFF] to-[#D674FF] p-[2px]">
-            <div class="w-full h-full rounded-full bg-[#0E0E11] flex items-center justify-center">
-              <span class="text-xl text-white/20 material-icons">person</span>
+          <div class="w-12 h-12 md:w-16 md:h-16 rounded-full bg-gradient-to-tr from-[#69DAFF] to-[#D674FF] p-[2px] shadow-lg">
+            <div class="w-full h-full rounded-full bg-[#0E0E11] flex items-center justify-center overflow-hidden">
+              <img *ngIf="(prefs.profilePicture$ | async) as pic" [src]="pic" referrerpolicy="no-referrer" class="w-full h-full object-cover">
+              <span *ngIf="!(prefs.profilePicture$ | async)" class="text-2xl text-white/20 material-icons">person</span>
             </div>
           </div>
         </div>
-        <h2 class="text-center text-sm font-black truncate mb-0.5">{{ prefs.name$ | async }}</h2>
-        <p class="text-center text-white/40 text-[10px] mb-3">{{ prefs.myGender$ | async }} • {{ prefs.age$ | async }} yrs</p>
-        <div class="w-full h-px bg-white/5 mb-3"></div>
-        <div class="space-y-2">
-          <div class="flex justify-between items-center px-2.5 py-2 rounded-lg bg-white/5">
-            <div class="flex items-center space-x-1.5 text-white/50">
-              <span class="material-icons text-[12px]">location_on</span>
-              <span class="text-[10px] font-medium">Location</span>
+        <h2 class="text-center text-[12px] md:text-[15px] font-black truncate mb-1 text-white/90">{{ prefs.name$ | async }}</h2>
+        <div *ngIf="!isEditingProfile" class="flex items-center justify-center space-x-1.5 mb-4 group cursor-pointer" (click)="toggleProfileEdit()" title="Edit Profile">
+          <p class="text-center text-white/50 text-[10px] md:text-[11px] font-medium group-hover:text-white/80 transition-colors">{{ prefs.myGender$ | async }} • {{ prefs.age$ | async }} yrs</p>
+          <span class="material-icons text-[11px] text-white/30 group-hover:text-[#69DAFF] transition-colors">edit</span>
+        </div>
+        
+        <!-- Edit Profile Form -->
+        <div *ngIf="isEditingProfile" class="flex flex-col items-center justify-center space-y-2 mb-4 bg-black/20 p-3 rounded-xl border border-white/5">
+          <select [(ngModel)]="currentMyGender" class="w-full bg-white/5 border border-white/10 text-[11px] text-white font-bold rounded-md px-2 py-1.5 outline-none focus:border-[#69DAFF] cursor-pointer">
+            <option *ngFor="let g of selfGenders" [value]="g" class="bg-[#16161D]">{{ g }}</option>
+          </select>
+          <input type="number" [(ngModel)]="currentAge" class="w-full bg-white/5 border border-white/10 text-[11px] text-white font-bold rounded-md px-2 py-1.5 outline-none focus:border-[#69DAFF] placeholder-white/20" min="18" max="99" placeholder="Age">
+          <button (click)="toggleProfileEdit()" class="w-full bg-gradient-to-r from-[#69DAFF]/20 to-[#D674FF]/20 text-white hover:text-black hover:from-[#69DAFF] hover:to-[#D674FF] text-[11px] font-black uppercase tracking-widest rounded-md py-1.5 mt-1 transition-all shadow-md">Save</button>
+        </div>
+
+        <div class="w-full h-px bg-white/5 mb-4"></div>
+
+        <!-- Profile Details List -->
+        <div class="space-y-2 mb-4">
+          <div class="flex justify-between items-center px-3 py-2 rounded-lg bg-white/5 border border-white/5">
+            <div class="flex items-center space-x-2 text-white/50">
+              <span class="material-icons text-[12px] md:text-[14px]">location_on</span>
+              <span class="text-[10px] md:text-[11px] font-medium">City</span>
             </div>
-            <span class="text-[10px] font-bold text-[#69DAFF] truncate max-w-[70px]">{{ prefs.detectedLocation || 'Unknown' }}</span>
+            <span class="text-[10px] md:text-[11px] font-bold text-[#69DAFF] truncate max-w-[60px] md:max-w-[80px]">{{ (prefs.detectedLocation$ | async) || 'Global' }}</span>
           </div>
-          <div class="flex justify-between items-center px-2.5 py-2 rounded-lg bg-white/5">
-            <div class="flex items-center space-x-1.5 text-white/50">
-              <span class="material-icons text-[12px]">badge</span>
-              <span class="text-[10px] font-medium">Gender</span>
+          <div class="flex justify-between items-center px-3 py-2 rounded-lg bg-white/5 border border-white/5">
+            <div class="flex items-center space-x-2 text-white/50">
+              <span class="material-icons text-[12px] md:text-[14px]">badge</span>
+              <span class="text-[10px] md:text-[11px] font-medium">Gender</span>
             </div>
-            <span class="text-[10px] font-bold text-white/70">{{ prefs.myGender$ | async }}</span>
+            <span class="text-[10px] md:text-[11px] font-bold text-white/80">{{ prefs.myGender$ | async }}</span>
           </div>
         </div>
+
+        <div class="mt-auto"></div>
+        <div class="w-full h-px bg-white/5 mt-6 mb-4"></div>
+        
+        <!-- Bottom Links -->
+        <div class="flex flex-col space-y-3 items-center text-[10px] md:text-[11px] text-white/40 font-medium pb-2 md:pb-4">
+          <a routerLink="/privacy-policy" class="hover:text-[#69DAFF] transition-colors cursor-pointer">Privacy Policy</a>
+          <a routerLink="/safety-standards" class="hover:text-[#D674FF] transition-colors cursor-pointer">Safety Standards</a>
+          <button (click)="promptDeleteAccount()" class="hover:text-red-400 transition-colors">Delete Account</button>
+        </div>
+
       </div>
     </aside>
 
     <!-- Center: Video Panels -->
-    <div class="flex-1 flex items-center justify-center px-3 md:px-6 py-3 min-h-0">
+    <div class="flex-1 flex flex-col min-w-0 px-2 md:px-3 py-3 md:py-4 h-full">
+      <!-- Quick Actions (Top Bar) - Visible even in fullscreen -->
+      <div class="flex justify-end items-center space-x-3 mb-3 md:mb-4 shrink-0">
+        <div class="bg-white/5 border border-white/10 px-3 py-1.5 rounded-full flex items-center space-x-1.5 shadow-lg" title="Coins">
+          <span class="text-amber-400 material-icons text-sm">monetization_on</span>
+          <span class="font-bold text-sm text-white/90">{{ prefs.coins$ | async }}</span>
+        </div>
+        <button (click)="toggleSocialPanel()" class="bg-white/5 hover:bg-white/10 text-white/70 border border-white/10 w-10 h-10 rounded-full flex items-center justify-center transition-all relative shadow-lg" title="Messages">
+          <span class="material-icons text-[20px]">forum</span>
+          <span *ngIf="pendingRequests.length > 0" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[8px] font-black rounded-full flex items-center justify-center border-2 border-[#0E0E11]">
+            {{ pendingRequests.length }}
+          </span>
+        </button>
+        <button (click)="logout()" class="bg-white/5 hover:bg-white/10 border border-white/10 text-white/50 hover:text-white w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-lg ml-2" title="Logout">
+          <span class="material-icons text-[18px]">logout</span>
+        </button>
+      </div>
+
       <!-- Main Container with unified border and radius -->
-      <div class="flex flex-col md:flex-row w-full h-full rounded-2xl md:rounded-[32px] overflow-hidden border-2 transition-all duration-500 bg-[#16161D] min-h-0"
+      <div class="flex-1 flex flex-col md:flex-row w-full rounded-2xl md:rounded-[32px] overflow-hidden border-2 transition-all duration-500 bg-[#16161D] min-h-0 shadow-2xl"
         [ngClass]="{
-          'max-w-5xl': !isFullScreen,
-          'max-w-none': isFullScreen,
           'border-white/10': state === 'idle' || (state === 'connected' && !isConnected),
           'border-[#69DAFF]/40': state === 'searching',
           'border-green-500/40': state === 'connected' && isConnected
@@ -78,13 +104,45 @@
             <span class="font-space font-bold text-white/90 tracking-[2px] text-[11px] drop-shadow-md">blynq.app</span>
           </div>
 
-          <div class="absolute bottom-2.5 left-2.5 bg-black/50 backdrop-blur-sm px-2.5 py-1 rounded-full flex items-center space-x-1.5 z-20">
+          <div *ngIf="!isConnected" class="absolute bottom-2.5 left-2.5 bg-black/50 backdrop-blur-sm px-2.5 py-1 rounded-full flex items-center space-x-1.5 z-20">
             <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
             <span class="text-[10px] font-bold text-white/80">You</span>
           </div>
           <div *ngIf="!localStream" class="absolute inset-0 flex flex-col items-center justify-center text-white/20 rounded-none z-10">
             <span class="material-icons text-4xl mb-2">videocam_off</span>
             <span class="text-[10px] font-medium">Camera off</span>
+          </div>
+
+          <!-- Full Width Transparent In-Call Chat Overlay (Left Panel) -->
+          <div *ngIf="isConnected && isInCallChatOpen" class="absolute bottom-0 left-0 right-0 h-[60%] z-30 flex flex-col pointer-events-auto bg-gradient-to-t from-black/80 via-black/30 to-transparent">
+            <!-- Header (Close Button) -->
+            <div class="absolute top-2 right-2 z-40">
+              <button (click)="toggleInCallChat()" class="w-6 h-6 rounded-full bg-black/40 text-white/50 hover:text-white flex items-center justify-center transition-colors">
+                <span class="material-icons text-[14px]">close</span>
+              </button>
+            </div>
+
+            <!-- Messages Area (grows up from bottom) -->
+            <div #chatScroll class="flex-1 overflow-y-auto p-3 flex flex-col-reverse space-y-reverse space-y-2 no-scrollbar">
+              <div class="flex flex-col space-y-2 pb-2">
+                <div *ngFor="let msg of inCallMessages" 
+                  [ngClass]="msg.sender === 'me' ? 'self-end bg-[#69DAFF] text-black rounded-br-sm' : 'self-start bg-black/60 text-white rounded-bl-sm border border-white/10'"
+                  class="max-w-[85%] px-3 py-1.5 rounded-xl shadow-md backdrop-blur-sm">
+                  <p class="text-[12px] md:text-[13px] leading-snug break-words font-bold">{{ msg.text }}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="px-3 pb-3 pt-1">
+              <div class="flex items-center bg-black/50 backdrop-blur-md rounded-full border border-white/20 px-1 py-1 focus-within:border-[#69DAFF]/60 transition-all shadow-lg">
+                <input [(ngModel)]="inCallChatInput" (keydown.enter)="sendInCallMessage()" placeholder="Type message..." 
+                  class="flex-1 bg-transparent px-3 py-1.5 text-xs text-white outline-none placeholder-white/60 font-medium">
+                <button (click)="sendInCallMessage()" class="w-8 h-8 rounded-full bg-[#69DAFF] text-black flex items-center justify-center transition-all active:scale-90 shrink-0">
+                  <span class="material-icons text-[14px]">send</span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -149,6 +207,25 @@
           <div *ngIf="remoteMetadata && isConnected" class="absolute top-2.5 left-2.5 bg-black/40 backdrop-blur-sm px-2.5 py-1 rounded-lg">
             <span class="text-[10px] text-white/50">{{ remoteMetadata.location || '' }}</span>
           </div>
+
+          <!-- Add Friend Button (Bottom of frame) -->
+          <div *ngIf="isConnected" class="absolute bottom-16 left-0 right-0 flex items-center justify-center pointer-events-none z-20">
+            <button (click)="handleFriendAction()" 
+              class="pointer-events-auto flex items-center space-x-2 px-6 py-2.5 rounded-2xl backdrop-blur-md border transition-all active:scale-95 shadow-2xl"
+              [ngClass]="{
+                'bg-[#19191D]/90 border-white/20 text-white hover:bg-black': friendStatus === 'none',
+                'bg-[#19191D]/90 border-green-500/50 text-green-400': friendStatus === 'sent',
+                'bg-[#D674FF]/20 border-[#D674FF]/50 text-[#D674FF]': friendStatus === 'received',
+                'bg-green-500/90 text-white border-green-400': friendStatus === 'friends'
+              }">
+              <span class="material-icons text-lg">
+                {{ friendStatus === 'none' ? 'person_add' : friendStatus === 'sent' ? 'check' : friendStatus === 'received' ? 'group_add' : 'handshake' }}
+              </span>
+              <span class="text-sm font-bold tracking-tight uppercase tracking-widest">
+                {{ friendStatus === 'none' ? 'Add Friend' : friendStatus === 'sent' ? 'Request Sent' : friendStatus === 'received' ? 'Accept Request' : 'Friends' }}
+              </span>
+            </button>
+          </div>
         </div>
 
       </div>
@@ -169,11 +246,15 @@
           <span class="material-icons text-[#69DAFF] text-[12px]">location_on</span>
           <span class="text-[10px] font-bold text-[#69DAFF] truncate max-w-[70px]">{{ (prefs.locations$ | async)?.join(', ') || 'Global' }}</span>
         </div>
-        <button (click)="toggleFilters()" class="bg-white/5 border border-white/10 px-3 py-1.5 rounded-full flex items-center space-x-1.5 shrink-0 hover:bg-white/10 transition-all active:scale-95">
+        <button (click)="openFilters()" class="bg-white/5 border border-white/10 px-3 py-1.5 rounded-full flex items-center space-x-1.5 shrink-0 hover:bg-white/10 transition-all active:scale-95">
           <span class="material-icons text-white/40 text-[12px]">tune</span>
           <span class="text-[10px] font-bold text-white/40">Edit</span>
         </button>
       </div>
+      <button (click)="addFreeCoins()" class="bg-[#69DAFF]/10 hover:bg-[#69DAFF] text-[#69DAFF] hover:text-white border border-[#69DAFF]/30 px-3 py-1.5 rounded-full flex items-center space-x-1.5 transition-all active:scale-95" title="Get Free Coins">
+        <span class="material-icons text-[14px]">play_circle_filled</span>
+        <span class="text-[10px] font-black uppercase tracking-wider">Free</span>
+      </button>
       <button (click)="toggleFullScreen()" class="bg-white/5 border border-white/10 px-3 py-1.5 rounded-full flex items-center space-x-1.5 shrink-0 hover:bg-white/10 transition-all active:scale-95" title="Toggle Fullscreen">
         <span class="material-icons text-white/40 text-[16px]">{{ isFullScreen ? 'fullscreen_exit' : 'fullscreen' }}</span>
       </button>
@@ -211,6 +292,10 @@
           <span class="material-icons text-[18px]">skip_next</span>
           <span class="text-[11px] font-black uppercase tracking-wider">Next</span>
         </button>
+        <button (click)="toggleInCallChat()" class="relative w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 active:scale-90 bg-white/10 text-white hover:bg-white/15" title="Chat">
+          <span class="material-icons text-[18px]">chat</span>
+          <span *ngIf="hasUnreadInCallMessages" class="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-red-500 rounded-full border border-black/60"></span>
+        </button>
         <button (click)="toggleFullScreen()" class="w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 active:scale-90 bg-white/10 text-white hover:bg-white/15" title="Toggle Fullscreen">
           <span class="material-icons text-[18px]">{{ isFullScreen ? 'fullscreen_exit' : 'fullscreen' }}</span>
         </button>
@@ -227,20 +312,11 @@
   <!-- Filters Modal -->
   <div *ngIf="showFilters" class="fixed inset-0 z-50 flex items-end justify-center bg-black/80 backdrop-blur-md sm:items-center">
     <div class="w-full sm:w-96 max-h-[90vh] overflow-y-auto bg-[#1A1A24] sm:rounded-[40px] rounded-t-[40px] border border-white/10 p-6 flex flex-col shadow-[0_-10px_50px_rgba(0,0,0,0.5)] relative">
-      <button (click)="toggleFilters()" class="absolute top-6 right-6 text-white/50 hover:text-white">
+      <button (click)="closeFilters(false)" class="absolute top-6 right-6 text-white/50 hover:text-white transition-colors">
         <span class="material-icons">close</span>
       </button>
 
       <h2 class="text-2xl font-black mb-6">Preferences</h2>
-
-      <div class="mb-6">
-        <h3 class="text-xs font-bold text-white/50 uppercase tracking-widest mb-3">I am</h3>
-        <div class="flex flex-wrap gap-2">
-          <button *ngFor="let g of selfGenders" (click)="setMyGender(g)"
-            [ngClass]="currentMyGender === g ? 'bg-[#69DAFF] text-black border-[#69DAFF]' : 'bg-white/5 text-white border-white/10 hover:bg-white/10'"
-            class="px-4 py-2 rounded-full border text-sm font-bold transition-all">{{ g }}</button>
-        </div>
-      </div>
 
       <div class="mb-6">
         <h3 class="text-xs font-bold text-white/50 uppercase tracking-widest mb-3">Interested In</h3>
@@ -269,19 +345,207 @@
         </div>
       </div>
 
-      <button (click)="toggleFilters()" class="w-full py-4 rounded-full bg-gradient-to-r from-[#69DAFF] to-[#D674FF] text-white font-black uppercase tracking-widest hover:scale-[1.02] transition-transform active:scale-95 shadow-lg mt-auto">
+      <button (click)="closeFilters(true)" class="w-full py-4 rounded-full bg-gradient-to-r from-[#69DAFF] to-[#D674FF] text-white font-black uppercase tracking-widest hover:scale-[1.02] transition-transform active:scale-95 shadow-lg mt-auto">
         Save & Apply
       </button>
     </div>
   </div>
 
-  <!-- Footer Links -->
-  <div class="absolute bottom-6 w-full flex justify-center gap-6 text-[10px] uppercase tracking-widest text-white/20 font-bold z-10">
-    <a routerLink="/privacy-policy" class="hover:text-white/60 transition-colors">Privacy Policy</a>
-    <a routerLink="/delete-account" class="hover:text-white/60 transition-colors">Account Deletion</a>
-  </div>
-
   <!-- Background Glow -->
   <div class="absolute top-1/4 left-1/4 w-32 h-32 bg-[#69DAFF] rounded-full blur-[120px] opacity-10 animate-pulse pointer-events-none"></div>
   <div class="absolute bottom-1/4 right-1/4 w-64 h-64 bg-[#D674FF] rounded-full blur-[150px] opacity-10 animate-pulse pointer-events-none"></div>
+
+  <!-- ═══ SOCIAL PANEL (Right Slide-over) ═══ -->
+  <div *ngIf="showSocialPanel" class="fixed inset-0 z-50 flex justify-end" (click)="toggleSocialPanel()">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+    <div class="relative w-full sm:w-[400px] h-full bg-[#0E0E11] border-l border-white/10 flex flex-col shadow-2xl" (click)="$event.stopPropagation()">
+
+      <!-- Panel Header (Android Style) -->
+      <div class="px-6 pt-8 pb-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-3xl font-space font-bold text-white tracking-tight">Messages</h2>
+          <button (click)="openAddFriendDialog()" class="w-10 h-10 rounded-full bg-[#69DAFF]/10 border border-[#69DAFF]/20 flex items-center justify-center text-[#69DAFF] hover:bg-[#69DAFF]/20 transition-all">
+            <span class="material-icons">add</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Tab Bar (Android Style) -->
+      <div class="px-6 mb-6">
+        <div class="bg-white/5 p-1 rounded-full border border-white/10 flex relative">
+          <button *ngFor="let tab of ['chats', 'friends', 'requests']" (click)="setSocialTab($any(tab))"
+            class="flex-1 py-2.5 rounded-full text-[12px] font-bold transition-all relative z-10"
+            [ngClass]="socialTab === tab ? 'text-black' : 'text-white/60 hover:text-white'">
+            {{ tab | titlecase }}
+            <span *ngIf="tab === 'requests' && pendingRequests.length > 0" 
+              class="ml-1 inline-flex items-center justify-center w-4 h-4 bg-red-500 text-white text-[8px] rounded-full">
+              {{ pendingRequests.length }}
+            </span>
+          </button>
+          
+          <!-- Animated Background Indicator -->
+          <div class="absolute top-1 bottom-1 w-[calc(33.33%-2.6px)] bg-gradient-to-r from-[#69DAFF] to-[#00CFFC] rounded-full transition-all duration-300 ease-out-cubic"
+            [style.left.px]="socialTab === 'chats' ? 4 : socialTab === 'friends' ? 128 : 252">
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Content -->
+      <div class="flex-1 overflow-y-auto min-h-0 px-6 pb-6">
+
+        <!-- Active Chat View (Android Style) -->
+        <div *ngIf="activeChatFriend" class="flex flex-col h-full bg-[#16161D] rounded-[32px] overflow-hidden border border-white/5">
+          <!-- Chat Header -->
+          <div class="flex items-center space-x-3 px-5 py-4 border-b border-white/5 bg-white/5">
+            <button (click)="activeChatFriend = null" class="text-white/40 hover:text-white transition-colors">
+              <span class="material-icons text-[20px]">arrow_back</span>
+            </button>
+            <div class="w-9 h-9 rounded-full bg-white/10 overflow-hidden border border-white/10">
+              <img *ngIf="activeChatFriend.photoUrl" [src]="activeChatFriend.photoUrl" referrerpolicy="no-referrer" class="w-full h-full object-cover">
+              <span *ngIf="!activeChatFriend.photoUrl" class="material-icons text-white/20 flex items-center justify-center h-full">person</span>
+            </div>
+            <div class="flex-1 min-w-0">
+              <h3 class="text-sm font-bold text-white truncate">{{ activeChatFriend.name }}</h3>
+              <p class="text-[10px] text-green-400 font-bold uppercase tracking-wider">Online</p>
+            </div>
+          </div>
+
+          <!-- Messages -->
+          <div class="flex-1 overflow-y-auto px-5 py-4 flex flex-col-reverse space-y-reverse space-y-3 no-scrollbar">
+            <div *ngFor="let msg of chatMessages" 
+              [ngClass]="isMyMessage(msg) ? 'self-end bg-[#69DAFF] text-black rounded-tr-none' : 'self-start bg-white/10 text-white rounded-tl-none'"
+              class="max-w-[85%] px-4 py-3 rounded-2xl shadow-sm">
+              <p class="text-[13px] leading-relaxed">{{ msg.text }}</p>
+              <p class="text-[8px] mt-1 opacity-40 font-bold" [ngClass]="isMyMessage(msg) ? 'text-right' : 'text-left'">
+                {{ formatChatTime(msg.timestamp) }}
+              </p>
+            </div>
+            
+            <div *ngIf="chatMessages.length === 0" class="flex flex-col items-center justify-center flex-1 py-20 opacity-20">
+              <span class="material-icons text-6xl mb-4">forum</span>
+              <p class="text-xs font-bold uppercase tracking-[2px]">Start the conversation</p>
+            </div>
+          </div>
+
+          <!-- Input -->
+          <div class="px-4 py-4 bg-white/5 border-t border-white/5">
+            <div class="flex items-center bg-black/40 rounded-2xl border border-white/10 px-2 py-1.5 focus-within:border-[#69DAFF]/40 transition-all">
+              <input [(ngModel)]="chatInput" (keydown.enter)="sendChatMessage()" placeholder="Type something..." 
+                class="flex-1 bg-transparent px-3 py-2 text-sm text-white outline-none placeholder-white/20">
+              <button (click)="sendChatMessage()" class="w-10 h-10 rounded-xl bg-[#69DAFF] text-black flex items-center justify-center transition-all active:scale-90">
+                <span class="material-icons">send</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- CHATS LIST (Android Style) -->
+        <div *ngIf="!activeChatFriend && socialTab === 'chats'" class="space-y-3">
+          <div *ngIf="activeChats.length === 0" class="flex flex-col items-center justify-center py-20 opacity-20">
+            <span class="material-icons text-7xl mb-4">chat_bubble_outline</span>
+            <p class="text-xs font-black uppercase tracking-[3px]">No Active Chats</p>
+          </div>
+          
+          <div *ngFor="let chat of activeChats" (click)="openChat(chat.friendUid, chat.friendName, chat.friendPhotoUrl)"
+            class="flex items-center space-x-4 p-4 rounded-3xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-[#69DAFF]/20 cursor-pointer transition-all group">
+            <div class="w-12 h-12 rounded-full bg-white/10 overflow-hidden flex items-center justify-center shrink-0 border border-white/10">
+              <img *ngIf="chat.friendPhotoUrl" [src]="chat.friendPhotoUrl" referrerpolicy="no-referrer" class="w-full h-full object-cover">
+              <span *ngIf="!chat.friendPhotoUrl" class="material-icons text-white/20">person</span>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex justify-between items-center mb-0.5">
+                <span class="text-sm font-bold text-white truncate">{{ chat.friendName }}</span>
+                <span class="text-[10px] text-white/30 font-medium">{{ formatChatTime(chat.lastMessageTime) }}</span>
+              </div>
+              <p class="text-xs text-white/40 truncate leading-snug">{{ chat.lastMessage }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- FRIENDS LIST (Android Style) -->
+        <div *ngIf="!activeChatFriend && socialTab === 'friends'" class="space-y-3">
+          <div *ngIf="friends.length === 0" class="flex flex-col items-center justify-center py-20 opacity-20">
+            <span class="material-icons text-7xl mb-4">people_outline</span>
+            <p class="text-xs font-black uppercase tracking-[3px]">No Friends Yet</p>
+          </div>
+
+          <div *ngFor="let friend of friends"
+            class="p-4 rounded-3xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all group">
+            <div class="flex items-center space-x-4">
+              <div class="w-12 h-12 rounded-full bg-white/10 overflow-hidden flex items-center justify-center shrink-0 border border-white/10">
+                <img *ngIf="friend.photoUrl" [src]="friend.photoUrl" referrerpolicy="no-referrer" class="w-full h-full object-cover">
+                <span *ngIf="!friend.photoUrl" class="material-icons text-white/20">person</span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <h4 class="text-sm font-bold text-white truncate mb-0.5">{{ friend.name }}</h4>
+                <div class="flex items-center space-x-1.5">
+                  <div class="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                  <span class="text-[10px] text-white/30 font-bold uppercase tracking-wider">Online</span>
+                </div>
+              </div>
+              <div class="flex items-center space-x-2">
+                <button (click)="openChat(friend.uid, friend.name, friend.photoUrl)" 
+                  class="w-9 h-9 rounded-2xl bg-white/5 flex items-center justify-center text-white/60 hover:bg-[#69DAFF]/20 hover:text-[#69DAFF] transition-all">
+                  <span class="material-icons text-[18px]">chat_bubble_outline</span>
+                </button>
+              </div>
+            </div>
+            
+            <!-- Friend Extra Info (visible on hover or focus - Android app uses expandable) -->
+            <div class="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
+              <div class="flex space-x-2">
+                <span class="px-2 py-1 rounded-lg bg-white/5 text-[9px] font-bold text-white/40 uppercase tracking-wider">{{ friend.gender || 'Any' }}</span>
+                <span class="px-2 py-1 rounded-lg bg-white/5 text-[9px] font-bold text-white/40 uppercase tracking-wider">{{ friend.age || '??' }} Yrs</span>
+              </div>
+              <span class="text-[9px] font-bold text-[#69DAFF] uppercase tracking-widest">{{ friend.location || 'Global' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- REQUESTS LIST (Android Style) -->
+        <div *ngIf="!activeChatFriend && socialTab === 'requests'" class="space-y-3">
+          <div *ngIf="pendingRequests.length === 0" class="flex flex-col items-center justify-center py-20 opacity-20">
+            <span class="material-icons text-7xl mb-4">person_add_outlined</span>
+            <p class="text-xs font-black uppercase tracking-[3px]">No Pending Requests</p>
+          </div>
+
+          <div *ngFor="let req of pendingRequests"
+            class="flex items-center space-x-4 p-4 rounded-3xl bg-white/5 border border-white/5">
+            <div class="w-12 h-12 rounded-full bg-white/10 overflow-hidden flex items-center justify-center shrink-0 border border-white/10">
+              <img *ngIf="req.senderPhotoUrl" [src]="req.senderPhotoUrl" referrerpolicy="no-referrer" class="w-full h-full object-cover">
+              <span *ngIf="!req.senderPhotoUrl" class="material-icons text-white/20">person</span>
+            </div>
+            <div class="flex-1 min-w-0">
+              <span class="text-sm font-bold text-white truncate block mb-0.5">{{ req.senderName || 'Unknown' }}</span>
+              <p class="text-[10px] text-white/30 font-medium italic">Wants to connect</p>
+            </div>
+            <div class="flex items-center space-x-2">
+              <button (click)="rejectRequest(req)" class="w-9 h-9 rounded-2xl bg-red-500/10 text-red-400 flex items-center justify-center hover:bg-red-500/20 transition-all">
+                <span class="material-icons text-[18px]">close</span>
+              </button>
+              <button (click)="acceptRequest(req)" class="w-9 h-9 rounded-2xl bg-[#69DAFF]/10 text-[#69DAFF] flex items-center justify-center hover:bg-[#69DAFF]/20 transition-all">
+                <span class="material-icons text-[18px]">check</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ ADD FRIEND DIALOG ═══ -->
+  <div *ngIf="showAddFriendDialog" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 backdrop-blur-md" (click)="showAddFriendDialog = false">
+    <div class="w-full max-w-sm bg-[#1A1A24] rounded-3xl border border-white/10 p-6 shadow-2xl" (click)="$event.stopPropagation()">
+      <h3 class="text-lg font-black mb-4">Add Friend</h3>
+      <p class="text-[11px] text-white/40 mb-4">Enter the UID of the user you want to add as a friend. You can find your UID in your profile.</p>
+      <input [(ngModel)]="addFriendUid" placeholder="Enter friend's UID" 
+        class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-[#69DAFF] placeholder-white/20 mb-3">
+      <p *ngIf="addFriendStatus" class="text-[11px] mb-3" 
+        [ngClass]="addFriendStatus === 'Request sent!' ? 'text-green-400' : addFriendStatus === 'Sending...' ? 'text-[#69DAFF]' : 'text-red-400'">{{ addFriendStatus }}</p>
+      <div class="flex space-x-3">
+        <button (click)="showAddFriendDialog = false" class="flex-1 py-3 rounded-xl bg-white/5 border border-white/10 text-white/60 text-sm font-bold hover:bg-white/10 transition-all">Cancel</button>
+        <button (click)="sendFriendRequest()" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-[#69DAFF] to-[#00A3FF] text-white text-sm font-bold hover:brightness-110 transition-all">Send Request</button>
+      </div>
+    </div>
+  </div>
 </div>

@@ -7,33 +7,39 @@ import { BehaviorSubject, Observable, Subject } from 'rxjs';
 })
 export class SignalingService {
   private socket!: Socket;
-  private serverUrl = 'https://p2pcall-signalling-service.onrender.com/';
-  
+  private serverUrl = 'https://web-production-17aa6.up.railway.app/';
+  // private serverUrl = 'https://p2pcall-signalling-service.onrender.com/';
+
   public peerConnection: RTCPeerConnection | null = null;
   public localStream: MediaStream | null = null;
   public remoteStream: MediaStream | null = null;
-  
+
   public roomId: string | null = null;
   public remoteMetadata: any | null = null;
   public isMatched = false;
-  
+
   private remoteStreamSubject = new BehaviorSubject<MediaStream | null>(null);
   public remoteStream$ = this.remoteStreamSubject.asObservable();
-  
+
   private peerJoinedSubject = new Subject<void>();
   public peerJoined$ = this.peerJoinedSubject.asObservable();
-  
+
   private sessionEndedSubject = new Subject<void>();
   public sessionEnded$ = this.sessionEndedSubject.asObservable();
-  
+
   private messageSubject = new BehaviorSubject<string | null>(null);
   public message$ = this.messageSubject.asObservable();
-  
+
   private typingStatusSubject = new BehaviorSubject<boolean>(false);
   public typingStatus$ = this.typingStatusSubject.asObservable();
 
   private isRemoteDescriptionSet = false;
+  private isPeerJoined = false;
   private isBusy = false;
+
+  public get isNegotiating(): boolean {
+    return this.isPeerJoined || this.isRemoteDescriptionSet;
+  }
   private iceConfiguration: RTCConfiguration = {};
 
   constructor() {
@@ -49,7 +55,7 @@ export class SignalingService {
 
   private setupSocketListeners() {
     this.socket.on('connect', () => console.log('[Signaling] Connected. ID:', this.socket.id));
-    
+
     this.socket.on('answer', async (data: any) => {
       if (this.peerConnection && !this.isRemoteDescriptionSet) {
         try {
@@ -68,17 +74,29 @@ export class SignalingService {
       }
     });
 
+    this.socket.on('message', (data: any) => {
+      console.log('[Signaling] Message received:', data);
+      this.messageSubject.next(data.text || '');
+    });
+
+    this.socket.on('typing', (data: any) => {
+      this.typingStatusSubject.next(data.isTyping || false);
+    });
+
     this.socket.on('peer_joined', (data: any) => {
       this.remoteMetadata = data.metadata;
+      this.isPeerJoined = true;
       this.peerJoinedSubject.next();
     });
 
     this.socket.on('session_ended', (data: any) => {
+      console.log('[Signaling] session_ended received:', data);
       // Ignore session_ended if it belongs to an old room, or if we've already cleared our roomId
-      if (data && data.room_id && data.room_id !== this.roomId) {
+      if (data && data.room_id && this.roomId && data.room_id !== this.roomId) {
         console.log(`[Signaling] Ignoring session_ended for old room ${data.room_id} (current: ${this.roomId})`);
         return;
       }
+      console.log('[Signaling] session_ended triggering subject');
       this.sessionEndedSubject.next();
     });
   }
@@ -97,11 +115,11 @@ export class SignalingService {
     this.isRemoteDescriptionSet = false;
 
     await this.fetchIceServers();
-    
+
     try {
       this.peerConnection = new RTCPeerConnection(this.iceConfiguration);
       this.setupPeerConnectionListeners();
-      
+
       this.localStream?.getTracks().forEach(t => this.peerConnection?.addTrack(t, this.localStream!));
 
       const offer = await this.peerConnection.createOffer();
@@ -109,12 +127,19 @@ export class SignalingService {
 
       return new Promise((resolve) => {
         this.socket.emit('create_room', { offer, metadata }, (data: any) => {
-          this.roomId = data.room_id;
-          this.isBusy = false;
-          resolve(this.roomId);
+          try {
+            this.roomId = data.room_id;
+            this.isBusy = false;
+            resolve(this.roomId);
+          } catch (e) {
+            console.error('[Signaling] Error in create_room callback:', e);
+            this.isBusy = false;
+            resolve(null);
+          }
         });
       });
     } catch (e) {
+      console.error('[Signaling] Error creating room:', e);
       this.isBusy = false;
       return null;
     }
@@ -128,21 +153,28 @@ export class SignalingService {
     return new Promise((resolve) => {
       this.socket.emit('join_room', { room_id: roomId, metadata }, async (data: any) => {
         if (data.success) {
-          this.remoteMetadata = data.metadata;
-          await this.fetchIceServers();
-          this.peerConnection = new RTCPeerConnection(this.iceConfiguration);
-          this.setupPeerConnectionListeners();
-          
-          await this.peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
-          this.isRemoteDescriptionSet = true;
-          
-          this.localStream?.getTracks().forEach(t => this.peerConnection?.addTrack(t, this.localStream!));
-          const answer = await this.peerConnection.createAnswer();
-          await this.peerConnection.setLocalDescription(answer);
-          this.socket.emit('send_answer', { room_id: roomId, answer });
-          
-          this.isBusy = false;
-          resolve(true);
+          try {
+            this.roomId = roomId; // CRITICAL: Save the room ID
+            this.remoteMetadata = data.metadata;
+            await this.fetchIceServers();
+            this.peerConnection = new RTCPeerConnection(this.iceConfiguration);
+            this.setupPeerConnectionListeners();
+
+            await this.peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
+            this.isRemoteDescriptionSet = true;
+
+            this.localStream?.getTracks().forEach(t => this.peerConnection?.addTrack(t, this.localStream!));
+            const answer = await this.peerConnection.createAnswer();
+            await this.peerConnection.setLocalDescription(answer);
+            this.socket.emit('send_answer', { room_id: roomId, answer });
+
+            this.isBusy = false;
+            resolve(true);
+          } catch (e) {
+            console.error('[Signaling] Error in join_room callback:', e);
+            this.isBusy = false;
+            resolve(false);
+          }
         } else {
           this.isBusy = false;
           resolve(false);
@@ -192,18 +224,19 @@ export class SignalingService {
   public async hangUp() {
     console.log('[Signaling] Hanging up and cleaning up PeerConnection...');
     if (this.roomId) this.socket.emit('leave_room', { room_id: this.roomId });
-    
+
     this.isRemoteDescriptionSet = false;
+    this.isPeerJoined = false;
     this.roomId = null;
     this.remoteMetadata = null;
     this.isMatched = false;
     this.isBusy = false;
-    
+
     // Stop remote video
     this.remoteStream?.getTracks().forEach(t => t.stop());
     this.remoteStream = null;
     this.remoteStreamSubject.next(null);
-    
+
     // Remove the listener before closing to prevent false 'session_ended' triggers
     if (this.peerConnection) {
       this.peerConnection.onconnectionstatechange = null;
@@ -214,5 +247,11 @@ export class SignalingService {
 
   public async stopWaiting() {
     await this.hangUp();
+  }
+
+  public sendMessage(text: string) {
+    if (this.roomId) {
+      this.socket.emit('send_message', { room_id: this.roomId, text });
+    }
   }
 }

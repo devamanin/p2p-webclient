@@ -5,9 +5,11 @@ import { DeleteAccountComponent } from './components/delete-account/delete-accou
 import { PrivacyPolicyComponent } from './components/privacy-policy/privacy-policy';
 import { SafetyStandardsComponent } from './components/safety-standards/safety-standards';
 
+import { AuthGuard } from './guards/auth.guard';
+
 export const routes: Routes = [
   { path: '', component: SplashComponent },
-  { path: 'home', component: HomeComponent },
+  { path: 'home', component: HomeComponent, canActivate: [AuthGuard] },
   { path: 'delete-account', component: DeleteAccountComponent },
   { path: 'privacy-policy', component: PrivacyPolicyComponent },
   { path: 'safety-standards', component: SafetyStandardsComponent },

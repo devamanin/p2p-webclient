@@ -120,7 +120,7 @@ export class MatchingComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private async performMatchmaking() {
-    if (this.isSearching || this.hasNavigated) return;
+    if (this.isSearching || this.hasNavigated || this.signalingService.isNegotiating) return;
     this.isSearching = true;
     
     const metadata = {

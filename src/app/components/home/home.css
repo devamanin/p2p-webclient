@@ -23,3 +23,22 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+.transition-all {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+.ease-out-cubic {
+  transition-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000);
+}
+
+@keyframes slide-up {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.4s cubic-bezier(0.215, 0.610, 0.355, 1.000) forwards;
+}
