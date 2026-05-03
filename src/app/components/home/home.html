@@ -7,8 +7,8 @@
         
         <!-- App Logo -->
         <div class="flex items-center justify-center space-x-2 mb-6 mt-2">
-          <span class="text-[#69DAFF] material-icons text-2xl md:text-3xl drop-shadow-[0_0_12px_rgba(105,218,255,0.8)]">blur_on</span>
-          <span class="font-space font-bold text-[18px] md:text-[22px] tracking-[2px] text-[#69DAFF] drop-shadow-[0_0_12px_rgba(105,218,255,0.8)]">blynq.app</span>
+          <img src="assets/logo.svg" alt="blynq logo" class="w-7 h-7 md:w-9 md:h-9 drop-shadow-[0_0_12px_rgba(105,218,255,0.8)]">
+          <span class="font-space font-bold text-[18px] md:text-[22px] tracking-[2px] text-white drop-shadow-[0_0_12px_rgba(105,218,255,0.8)]">blynq.app</span>
         </div>
 
         <!-- Profile Section -->
@@ -100,8 +100,9 @@
           <video #localPreview autoplay playsinline muted class="w-full h-full object-cover scale-x-[-1] rounded-none"></video>
           
           <!-- Watermark -->
-          <div class="absolute top-3 left-3 z-20 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 flex items-center justify-center">
-            <span class="font-space font-bold text-white/90 tracking-[2px] text-[11px] drop-shadow-md">blynq.app</span>
+          <div class="absolute top-4 left-4 z-20 flex items-center justify-center space-x-2 md:space-x-2.5">
+            <img src="assets/logo.svg" alt="logo" class="w-5 h-5 md:w-6 md:h-6 opacity-90 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+            <span class="font-space font-bold text-white tracking-[2px] text-[14px] md:text-[16px] drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] pt-0.5">blynq.app</span>
           </div>
 
           <div *ngIf="!isConnected" class="absolute bottom-2.5 left-2.5 bg-black/50 backdrop-blur-sm px-2.5 py-1 rounded-full flex items-center space-x-1.5 z-20">
