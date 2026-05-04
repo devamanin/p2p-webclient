@@ -28,6 +28,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   // UI state
   public state: AppState = 'idle';
   public showFilters = false;
+  public showProfileDrawer = false;
   public isEditingProfile = false;
   public localStream: MediaStream | null = null;
   public isConnected = false;
@@ -305,9 +306,9 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
       if (this.localPreview && this.localPreview.nativeElement) {
         if (this.localPreview.nativeElement.srcObject !== this.localStream) {
           this.localPreview.nativeElement.srcObject = this.localStream;
-          this.localPreview.nativeElement.muted = true;
-          this.localPreview.nativeElement.play().catch(() => {});
         }
+        this.localPreview.nativeElement.muted = true;
+        this.localPreview.nativeElement.play().catch(() => {});
       }
       if (this.searchNonce !== myNonce) return;
       this.cdr.detectChanges(); // Ensure UI updates to searching state
@@ -509,6 +510,13 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
         this.remoteMetadata = null;
         this.isMuted = false;
         this.isCameraOff = false;
+
+        // Ensure tracks are re-enabled if they were turned off during a call
+        if (this.signalingService.localStream) {
+          this.signalingService.localStream.getAudioTracks().forEach(t => t.enabled = true);
+          this.signalingService.localStream.getVideoTracks().forEach(t => t.enabled = true);
+        }
+
         this.friendStatus = 'none';
         this.inCallMessages = [];
         this.inCallChatInput = '';
@@ -537,6 +545,13 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     this.remoteMetadata = null;
     this.isMuted = false;
     this.isCameraOff = false;
+    
+    // Ensure tracks are re-enabled if they were turned off during a call
+    if (this.signalingService.localStream) {
+      this.signalingService.localStream.getAudioTracks().forEach(t => t.enabled = true);
+      this.signalingService.localStream.getVideoTracks().forEach(t => t.enabled = true);
+    }
+    
     this.friendStatus = 'none';
     this.inCallMessages = [];
     this.inCallChatInput = '';
@@ -650,11 +665,19 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   logout() { this.authService.logout().then(() => this.router.navigate(['/'])); }
 
   // ─── SOCIAL PANEL ───
-
-  toggleSocialPanel() {
+  public toggleSocialPanel() {
     this.showSocialPanel = !this.showSocialPanel;
-    if (!this.showSocialPanel) {
+    if (this.showSocialPanel) {
+      this.showProfileDrawer = false;
+    } else {
       this.activeChatFriend = null;
+    }
+  }
+
+  public toggleProfileDrawer() {
+    this.showProfileDrawer = !this.showProfileDrawer;
+    if (this.showProfileDrawer) {
+      this.showSocialPanel = false;
     }
   }
 

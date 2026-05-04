@@ -1,10 +1,21 @@
 <div class="h-screen w-full bg-[#0E0E11] flex flex-col relative overflow-hidden">
+  
+  <!-- Mobile Profile Backdrop -->
+  <div *ngIf="showProfileDrawer" class="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[65]" (click)="toggleProfileDrawer()"></div>
+
   <!-- Main Content -->
-  <main class="flex-1 flex flex-row relative z-10 min-h-0">
+  <main class="flex-1 flex flex-row min-h-0">
     <!-- Left Sidebar: User Profile & Nav -->
-    <aside *ngIf="!isFullScreen" class="flex flex-col pl-3 md:pl-6 pr-2 md:pr-3 py-3 md:py-4 w-[190px] md:w-[260px] shrink-0 transition-all duration-300 h-full">
-      <div class="bg-[#16161D] border border-white/10 rounded-[20px] md:rounded-[32px] p-4 md:p-6 flex flex-col h-full w-full overflow-y-auto no-scrollbar shadow-2xl">
+    <aside *ngIf="!isFullScreen" 
+      [ngClass]="showProfileDrawer ? 'translate-x-0' : '-translate-x-full md:translate-x-0'"
+      class="fixed md:relative inset-y-0 left-0 z-[100] flex flex-col pl-3 md:pl-6 pr-2 md:pr-3 py-3 md:py-4 w-[280px] md:w-[260px] shrink-0 transition-all duration-300 h-full bg-[#0E0E11] md:bg-transparent">
+      <div class="bg-[#16161D] border border-white/10 rounded-[32px] p-6 flex flex-col h-full w-full overflow-y-auto no-scrollbar shadow-2xl">
         
+        <!-- Mobile Close Button -->
+        <button (click)="toggleProfileDrawer()" class="md:hidden absolute top-6 right-8 text-white/40 hover:text-white">
+          <span class="material-icons">close</span>
+        </button>
+
         <!-- App Logo -->
         <div class="flex items-center justify-center space-x-2 mb-6 mt-2">
           <img src="assets/logo.svg" alt="blynq logo" class="w-7 h-7 md:w-9 md:h-9 drop-shadow-[0_0_12px_rgba(105,218,255,0.8)]">
@@ -69,22 +80,37 @@
     </aside>
 
     <!-- Center: Video Panels -->
-    <div class="flex-1 flex flex-col min-w-0 px-2 md:px-3 py-3 md:py-4 h-full">
-      <!-- Quick Actions (Top Bar) - Visible even in fullscreen -->
-      <div class="flex justify-end items-center space-x-3 mb-3 md:mb-4 shrink-0">
-        <div class="bg-white/5 border border-white/10 px-3 py-1.5 rounded-full flex items-center space-x-1.5 shadow-lg" title="Coins">
-          <span class="text-amber-400 material-icons text-sm">monetization_on</span>
-          <span class="font-bold text-sm text-white/90">{{ prefs.coins$ | async }}</span>
+    <div class="flex-1 flex flex-col min-w-0 px-2 md:px-3 py-3 md:py-4 h-full relative">
+      <!-- Quick Actions (Top Bar) -->
+      <div class="flex justify-between items-center mb-3 md:mb-4 shrink-0">
+        <!-- Mobile Profile Button -->
+        <div class="md:hidden">
+          <button (click)="toggleProfileDrawer()" class="bg-white/5 hover:bg-white/10 text-white/70 border border-white/10 w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-lg">
+            <span class="material-icons text-[20px]">person</span>
+          </button>
         </div>
-        <button (click)="toggleSocialPanel()" class="bg-white/5 hover:bg-white/10 text-white/70 border border-white/10 w-10 h-10 rounded-full flex items-center justify-center transition-all relative shadow-lg" title="Messages">
-          <span class="material-icons text-[20px]">forum</span>
-          <span *ngIf="pendingRequests.length > 0" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[8px] font-black rounded-full flex items-center justify-center border-2 border-[#0E0E11]">
-            {{ pendingRequests.length }}
-          </span>
-        </button>
-        <button (click)="logout()" class="bg-white/5 hover:bg-white/10 border border-white/10 text-white/50 hover:text-white w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-lg ml-2" title="Logout">
-          <span class="material-icons text-[18px]">logout</span>
-        </button>
+        
+        <div class="hidden md:block"></div>
+
+        <div class="flex items-center space-x-2 md:space-x-3">
+          <div class="bg-white/5 border border-white/10 px-3 py-1.5 rounded-full flex items-center space-x-1.5 shadow-lg" title="Coins">
+            <span class="text-amber-400 material-icons text-sm">monetization_on</span>
+            <span class="font-bold text-sm text-white/90">{{ prefs.coins$ | async }}</span>
+          </div>
+          <button (click)="addFreeCoins()" class="bg-[#69DAFF]/10 hover:bg-[#69DAFF] text-[#69DAFF] hover:text-white border border-[#69DAFF]/30 px-3 py-1.5 rounded-full flex items-center space-x-1.5 transition-all active:scale-95 shadow-lg" title="Get Free Coins">
+            <span class="material-icons text-[14px]">play_circle_filled</span>
+            <span class="text-[10px] font-black uppercase tracking-wider">Free</span>
+          </button>
+          <button (click)="toggleSocialPanel()" class="bg-white/5 hover:bg-white/10 text-white/70 border border-white/10 w-10 h-10 rounded-full flex items-center justify-center transition-all relative shadow-lg" title="Messages">
+            <span class="material-icons text-[20px]">forum</span>
+            <span *ngIf="pendingRequests.length > 0" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[8px] font-black rounded-full flex items-center justify-center border-2 border-[#0E0E11]">
+              {{ pendingRequests.length }}
+            </span>
+          </button>
+          <button (click)="logout()" class="bg-white/5 hover:bg-white/10 border border-white/10 text-white/50 hover:text-white w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-lg ml-1 md:ml-2" title="Logout">
+            <span class="material-icons text-[18px]">logout</span>
+          </button>
+        </div>
       </div>
 
       <!-- Main Container with unified border and radius -->
@@ -95,60 +121,8 @@
           'border-green-500/40': state === 'connected' && isConnected
         }">
         
-        <!-- Left: Your Video -->
-        <div class="flex-1 relative min-h-0 border-b-2 md:border-b-0 md:border-r-2 border-white/10 rounded-none">
-          <video #localPreview autoplay playsinline muted class="w-full h-full object-cover scale-x-[-1] rounded-none"></video>
-          
-          <!-- Watermark -->
-          <div class="absolute top-4 left-4 z-20 flex items-center justify-center space-x-2 md:space-x-2.5">
-            <img src="assets/logo.svg" alt="logo" class="w-5 h-5 md:w-6 md:h-6 opacity-90 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-            <span class="font-space font-bold text-white tracking-[2px] text-[14px] md:text-[16px] drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] pt-0.5">blynq.app</span>
-          </div>
-
-          <div *ngIf="!isConnected" class="absolute bottom-2.5 left-2.5 bg-black/50 backdrop-blur-sm px-2.5 py-1 rounded-full flex items-center space-x-1.5 z-20">
-            <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-            <span class="text-[10px] font-bold text-white/80">You</span>
-          </div>
-          <div *ngIf="!localStream" class="absolute inset-0 flex flex-col items-center justify-center text-white/20 rounded-none z-10">
-            <span class="material-icons text-4xl mb-2">videocam_off</span>
-            <span class="text-[10px] font-medium">Camera off</span>
-          </div>
-
-          <!-- Full Width Transparent In-Call Chat Overlay (Left Panel) -->
-          <div *ngIf="isConnected && isInCallChatOpen" class="absolute bottom-0 left-0 right-0 h-[60%] z-30 flex flex-col pointer-events-auto bg-gradient-to-t from-black/80 via-black/30 to-transparent">
-            <!-- Header (Close Button) -->
-            <div class="absolute top-2 right-2 z-40">
-              <button (click)="toggleInCallChat()" class="w-6 h-6 rounded-full bg-black/40 text-white/50 hover:text-white flex items-center justify-center transition-colors">
-                <span class="material-icons text-[14px]">close</span>
-              </button>
-            </div>
-
-            <!-- Messages Area (grows up from bottom) -->
-            <div #chatScroll class="flex-1 overflow-y-auto p-3 flex flex-col-reverse space-y-reverse space-y-2 no-scrollbar">
-              <div class="flex flex-col space-y-2 pb-2">
-                <div *ngFor="let msg of inCallMessages" 
-                  [ngClass]="msg.sender === 'me' ? 'self-end bg-[#69DAFF] text-black rounded-br-sm' : 'self-start bg-black/60 text-white rounded-bl-sm border border-white/10'"
-                  class="max-w-[85%] px-3 py-1.5 rounded-xl shadow-md backdrop-blur-sm">
-                  <p class="text-[12px] md:text-[13px] leading-snug break-words font-bold">{{ msg.text }}</p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Input Area -->
-            <div class="px-3 pb-3 pt-1">
-              <div class="flex items-center bg-black/50 backdrop-blur-md rounded-full border border-white/20 px-1 py-1 focus-within:border-[#69DAFF]/60 transition-all shadow-lg">
-                <input [(ngModel)]="inCallChatInput" (keydown.enter)="sendInCallMessage()" placeholder="Type message..." 
-                  class="flex-1 bg-transparent px-3 py-1.5 text-xs text-white outline-none placeholder-white/60 font-medium">
-                <button (click)="sendInCallMessage()" class="w-8 h-8 rounded-full bg-[#69DAFF] text-black flex items-center justify-center transition-all active:scale-90 shrink-0">
-                  <span class="material-icons text-[14px]">send</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Right: Peer Panel (changes by state) -->
-        <div class="flex-1 relative min-h-0 bg-[#16161D] rounded-none">
+        <!-- Right/Top: Peer Panel (changes by state) -->
+        <div class="flex-1 relative min-h-0 bg-[#16161D] rounded-none border-b-2 md:border-b-0 md:border-r-2 border-white/10 overflow-hidden">
           
           <!-- Remote video element (always present) -->
           <video #remoteVideo autoplay playsinline class="w-full h-full object-cover rounded-none" 
@@ -194,22 +168,21 @@
             <p class="text-xs font-bold text-white/40">Connecting...</p>
           </div>
 
-          <!-- Label -->
-          <div class="absolute bottom-2.5 left-2.5 bg-black/50 backdrop-blur-sm px-2.5 py-1 rounded-full flex items-center space-x-1.5">
+          <!-- Peer info overlay (Top) -->
+          <div class="absolute top-2.5 left-2.5 bg-black/50 backdrop-blur-sm px-2.5 py-1 rounded-full flex items-center space-x-1.5 z-20">
             <div class="w-2 h-2 rounded-full" 
               [ngClass]="isConnected ? 'bg-green-400 animate-pulse' : state === 'searching' ? 'bg-[#69DAFF] animate-pulse' : 'bg-white/20'"></div>
             <span class="text-[10px] font-bold"
               [ngClass]="isConnected ? 'text-white/80' : 'text-white/40'">
               {{ isConnected ? (remoteMetadata?.name || 'Stranger') : state === 'searching' ? 'Finding...' : 'Stranger' }}
             </span>
+            <ng-container *ngIf="remoteMetadata && isConnected && remoteMetadata.location">
+              <div class="w-px h-2.5 bg-white/20 mx-0.5"></div>
+              <span class="text-[10px] text-white/50">{{ remoteMetadata.location }}</span>
+            </ng-container>
           </div>
 
-          <!-- Peer info overlay when connected -->
-          <div *ngIf="remoteMetadata && isConnected" class="absolute top-2.5 left-2.5 bg-black/40 backdrop-blur-sm px-2.5 py-1 rounded-lg">
-            <span class="text-[10px] text-white/50">{{ remoteMetadata.location || '' }}</span>
-          </div>
-
-          <!-- Add Friend Button (Bottom of frame) -->
+          <!-- Add Friend Button -->
           <div *ngIf="isConnected" class="absolute bottom-16 left-0 right-0 flex items-center justify-center pointer-events-none z-20">
             <button (click)="handleFriendAction()" 
               class="pointer-events-auto flex items-center space-x-2 px-6 py-2.5 rounded-2xl backdrop-blur-md border transition-all active:scale-95 shadow-2xl"
@@ -229,6 +202,58 @@
           </div>
         </div>
 
+        <!-- Left/Bottom: Your Video -->
+        <div class="flex-1 relative min-h-0 border-white/10 rounded-none overflow-hidden">
+          <video #localPreview autoplay playsinline muted class="w-full h-full object-cover scale-x-[-1] rounded-none"></video>
+          
+          <!-- Watermark -->
+          <div class="absolute top-4 left-4 z-20 flex items-center justify-center space-x-2 md:space-x-2.5">
+            <img src="assets/logo.svg" alt="logo" class="w-5 h-5 md:w-6 md:h-6 opacity-90 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+            <span class="font-space font-bold text-white tracking-[2px] text-[14px] md:text-[16px] drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] pt-0.5">blynq.app</span>
+          </div>
+
+          <div *ngIf="!isConnected" class="absolute bottom-2.5 left-2.5 bg-black/50 backdrop-blur-sm px-2.5 py-1 rounded-full flex items-center space-x-1.5 z-20">
+            <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+            <span class="text-[10px] font-bold text-white/80">You</span>
+          </div>
+          <div *ngIf="!localStream" class="absolute inset-0 flex flex-col items-center justify-center text-white/20 rounded-none z-10">
+            <span class="material-icons text-4xl mb-2">videocam_off</span>
+            <span class="text-[10px] font-medium">Camera off</span>
+          </div>
+
+          <!-- Full Width Transparent In-Call Chat Overlay -->
+          <div *ngIf="isConnected && isInCallChatOpen" class="absolute bottom-0 left-0 right-0 h-[60%] z-30 flex flex-col pointer-events-auto bg-gradient-to-t from-black/80 via-black/30 to-transparent">
+            <!-- Header (Close Button) -->
+            <div class="absolute top-2 right-2 z-40">
+              <button (click)="toggleInCallChat()" class="w-6 h-6 rounded-full bg-black/40 text-white/50 hover:text-white flex items-center justify-center transition-colors">
+                <span class="material-icons text-[14px]">close</span>
+              </button>
+            </div>
+
+            <!-- Messages Area -->
+            <div #chatScroll class="flex-1 overflow-y-auto p-3 flex flex-col-reverse space-y-reverse space-y-2 no-scrollbar">
+              <div class="flex flex-col space-y-2 pb-2">
+                <div *ngFor="let msg of inCallMessages" 
+                  [ngClass]="msg.sender === 'me' ? 'self-end bg-[#69DAFF] text-black rounded-br-sm' : 'self-start bg-black/60 text-white rounded-bl-sm border border-white/10'"
+                  class="max-w-[85%] px-3 py-1.5 rounded-xl shadow-md backdrop-blur-sm">
+                  <p class="text-[12px] md:text-[13px] leading-snug break-words font-bold">{{ msg.text }}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="px-3 pb-3 pt-1">
+              <div class="flex items-center bg-black/50 backdrop-blur-md rounded-full border border-white/20 px-1 py-1 focus-within:border-[#69DAFF]/60 transition-all shadow-lg">
+                <input [(ngModel)]="inCallChatInput" (keydown.enter)="sendInCallMessage()" placeholder="Type message..." 
+                  class="flex-1 bg-transparent px-3 py-1.5 text-xs text-white outline-none placeholder-white/60 font-medium">
+                <button (click)="sendInCallMessage()" class="w-8 h-8 rounded-full bg-[#69DAFF] text-black flex items-center justify-center transition-all active:scale-90 shrink-0">
+                  <span class="material-icons text-[14px]">send</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </main>
@@ -239,24 +264,24 @@
     <!-- IDLE: Preferences + Connect -->
     <div *ngIf="state === 'idle'" class="flex items-center justify-center gap-2.5">
       <div class="flex items-center gap-2 overflow-x-auto no-scrollbar">
-        <div class="bg-white/5 border border-white/10 px-3 py-1.5 rounded-full flex items-center space-x-1.5 shrink-0">
+        <div class="hidden md:flex bg-white/5 border border-white/10 px-3 py-1.5 rounded-full items-center space-x-1.5 shrink-0">
           <span class="material-icons text-[#D674FF] text-[12px]">favorite</span>
           <span class="text-[10px] font-bold text-[#D674FF]">{{ prefs.targetGender$ | async }}</span>
         </div>
-        <div class="bg-white/5 border border-white/10 px-3 py-1.5 rounded-full flex items-center space-x-1.5 shrink-0">
-          <span class="material-icons text-[#69DAFF] text-[12px]">location_on</span>
-          <span class="text-[10px] font-bold text-[#69DAFF] truncate max-w-[70px]">{{ (prefs.locations$ | async)?.join(', ') || 'Global' }}</span>
+        <div class="hidden md:flex bg-white/5 border border-white/10 px-3 py-1.5 rounded-full items-center space-x-1.5 shrink-0">
+          <span class="material-icons text-[#69DAFF] text-[12px]">interests</span>
+          <span class="text-[10px] font-bold text-[#69DAFF] truncate max-w-[70px]">{{ (prefs.interests$ | async)?.length ? ((prefs.interests$ | async)?.length + ' Interests') : 'Interests' }}</span>
+        </div>
+        <div class="hidden md:flex bg-white/5 border border-white/10 px-3 py-1.5 rounded-full items-center space-x-1.5 shrink-0">
+          <span class="material-icons text-green-400 text-[12px]">location_on</span>
+          <span class="text-[10px] font-bold text-green-400 truncate max-w-[70px]">{{ (prefs.locations$ | async)?.join(', ') || 'Global' }}</span>
         </div>
         <button (click)="openFilters()" class="bg-white/5 border border-white/10 px-3 py-1.5 rounded-full flex items-center space-x-1.5 shrink-0 hover:bg-white/10 transition-all active:scale-95">
           <span class="material-icons text-white/40 text-[12px]">tune</span>
-          <span class="text-[10px] font-bold text-white/40">Edit</span>
+          <span class="text-[10px] font-bold text-white/40">Edit Preference</span>
         </button>
       </div>
-      <button (click)="addFreeCoins()" class="bg-[#69DAFF]/10 hover:bg-[#69DAFF] text-[#69DAFF] hover:text-white border border-[#69DAFF]/30 px-3 py-1.5 rounded-full flex items-center space-x-1.5 transition-all active:scale-95" title="Get Free Coins">
-        <span class="material-icons text-[14px]">play_circle_filled</span>
-        <span class="text-[10px] font-black uppercase tracking-wider">Free</span>
-      </button>
-      <button (click)="toggleFullScreen()" class="bg-white/5 border border-white/10 px-3 py-1.5 rounded-full flex items-center space-x-1.5 shrink-0 hover:bg-white/10 transition-all active:scale-95" title="Toggle Fullscreen">
+      <button (click)="toggleFullScreen()" class="hidden md:flex bg-white/5 border border-white/10 px-3 py-1.5 rounded-full items-center space-x-1.5 shrink-0 hover:bg-white/10 transition-all active:scale-95" title="Toggle Fullscreen">
         <span class="material-icons text-white/40 text-[16px]">{{ isFullScreen ? 'fullscreen_exit' : 'fullscreen' }}</span>
       </button>
       <button (click)="startMatching()" 
@@ -281,26 +306,26 @@
 
     <!-- CONNECTED: Call controls -->
     <div *ngIf="state === 'connected'" class="flex items-center justify-center">
-      <div class="flex items-center space-x-2.5 px-4 py-2.5 bg-black/60 backdrop-blur-2xl rounded-full border border-white/15 shadow-2xl">
-        <button (click)="toggleMute()" class="w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 active:scale-90" 
+      <div class="flex items-center space-x-1.5 md:space-x-2.5 px-3 md:px-4 py-2.5 bg-black/60 backdrop-blur-2xl rounded-full border border-white/15 shadow-2xl">
+        <button (click)="toggleMute()" class="w-10 h-10 md:w-11 md:h-11 rounded-full flex items-center justify-center transition-all duration-200 active:scale-90" 
           [ngClass]="isMuted ? 'bg-red-500 text-white' : 'bg-white/10 text-white hover:bg-white/15'">
           <span class="material-icons text-[18px]">{{ isMuted ? 'mic_off' : 'mic' }}</span>
         </button>
-        <button (click)="handleEnd()" class="w-11 h-11 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white transition-all duration-200 active:scale-90">
+        <button (click)="handleEnd()" class="w-10 h-10 md:w-11 md:h-11 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white transition-all duration-200 active:scale-90">
           <span class="material-icons text-[18px]">call_end</span>
         </button>
-        <button (click)="handleNext()" class="h-11 bg-gradient-to-r from-[#69DAFF] to-[#00A3FF] hover:brightness-110 px-4 rounded-full flex items-center space-x-1.5 text-white transition-all duration-200 active:scale-95 shadow-lg shadow-cyan-500/20">
+        <button (click)="handleNext()" class="h-10 md:h-11 bg-gradient-to-r from-[#69DAFF] to-[#00A3FF] hover:brightness-110 px-3 md:px-4 rounded-full flex items-center space-x-1 md:space-x-1.5 text-white transition-all duration-200 active:scale-95 shadow-lg shadow-cyan-500/20">
           <span class="material-icons text-[18px]">skip_next</span>
-          <span class="text-[11px] font-black uppercase tracking-wider">Next</span>
+          <span class="text-[10px] md:text-[11px] font-black uppercase tracking-wider">Next</span>
         </button>
-        <button (click)="toggleInCallChat()" class="relative w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 active:scale-90 bg-white/10 text-white hover:bg-white/15" title="Chat">
+        <button (click)="toggleInCallChat()" class="relative w-10 h-10 md:w-11 md:h-11 rounded-full flex items-center justify-center transition-all duration-200 active:scale-90 bg-white/10 text-white hover:bg-white/15" title="Chat">
           <span class="material-icons text-[18px]">chat</span>
           <span *ngIf="hasUnreadInCallMessages" class="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-red-500 rounded-full border border-black/60"></span>
         </button>
-        <button (click)="toggleFullScreen()" class="w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 active:scale-90 bg-white/10 text-white hover:bg-white/15" title="Toggle Fullscreen">
+        <button (click)="toggleFullScreen()" class="hidden md:flex w-10 h-10 md:w-11 md:h-11 rounded-full items-center justify-center transition-all duration-200 active:scale-90 bg-white/10 text-white hover:bg-white/15" title="Toggle Fullscreen">
           <span class="material-icons text-[18px]">{{ isFullScreen ? 'fullscreen_exit' : 'fullscreen' }}</span>
         </button>
-        <button (click)="toggleCamera()" class="w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 active:scale-90"
+        <button (click)="toggleCamera()" class="w-10 h-10 md:w-11 md:h-11 rounded-full flex items-center justify-center transition-all duration-200 active:scale-90"
           [ngClass]="isCameraOff ? 'bg-red-500 text-white' : 'bg-white/10 text-white hover:bg-white/15'">
           <span class="material-icons text-[18px]">{{ isCameraOff ? 'videocam_off' : 'videocam' }}</span>
         </button>
@@ -352,12 +377,10 @@
     </div>
   </div>
 
-  <!-- Background Glow -->
-  <div class="absolute top-1/4 left-1/4 w-32 h-32 bg-[#69DAFF] rounded-full blur-[120px] opacity-10 animate-pulse pointer-events-none"></div>
-  <div class="absolute bottom-1/4 right-1/4 w-64 h-64 bg-[#D674FF] rounded-full blur-[150px] opacity-10 animate-pulse pointer-events-none"></div>
+  <!-- Background Glow removed to prevent flashing -->
 
   <!-- ═══ SOCIAL PANEL (Right Slide-over) ═══ -->
-  <div *ngIf="showSocialPanel" class="fixed inset-0 z-50 flex justify-end" (click)="toggleSocialPanel()">
+  <div *ngIf="showSocialPanel" class="fixed inset-0 z-[120] flex justify-end" (click)="toggleSocialPanel()">
     <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
     <div class="relative w-full sm:w-[400px] h-full bg-[#0E0E11] border-l border-white/10 flex flex-col shadow-2xl" (click)="$event.stopPropagation()">
 
@@ -365,8 +388,8 @@
       <div class="px-6 pt-8 pb-4">
         <div class="flex items-center justify-between">
           <h2 class="text-3xl font-space font-bold text-white tracking-tight">Messages</h2>
-          <button (click)="openAddFriendDialog()" class="w-10 h-10 rounded-full bg-[#69DAFF]/10 border border-[#69DAFF]/20 flex items-center justify-center text-[#69DAFF] hover:bg-[#69DAFF]/20 transition-all">
-            <span class="material-icons">add</span>
+          <button (click)="toggleSocialPanel()" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-white transition-all">
+            <span class="material-icons">close</span>
           </button>
         </div>
       </div>
@@ -385,8 +408,8 @@
           </button>
           
           <!-- Animated Background Indicator -->
-          <div class="absolute top-1 bottom-1 w-[calc(33.33%-2.6px)] bg-gradient-to-r from-[#69DAFF] to-[#00CFFC] rounded-full transition-all duration-300 ease-out-cubic"
-            [style.left.px]="socialTab === 'chats' ? 4 : socialTab === 'friends' ? 128 : 252">
+          <div class="absolute top-1 bottom-1 w-[calc(33.33%-8px)] bg-gradient-to-r from-[#69DAFF] to-[#00CFFC] rounded-full transition-all duration-300 ease-out-cubic"
+            [style.left.%]="socialTab === 'chats' ? 0.5 : socialTab === 'friends' ? 33.8 : 67.2">
           </div>
         </div>
       </div>
@@ -492,7 +515,7 @@
               </div>
             </div>
             
-            <!-- Friend Extra Info (visible on hover or focus - Android app uses expandable) -->
+            <!-- Friend Extra Info -->
             <div class="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
               <div class="flex space-x-2">
                 <span class="px-2 py-1 rounded-lg bg-white/5 text-[9px] font-bold text-white/40 uppercase tracking-wider">{{ friend.gender || 'Any' }}</span>
@@ -535,7 +558,7 @@
   </div>
 
   <!-- ═══ ADD FRIEND DIALOG ═══ -->
-  <div *ngIf="showAddFriendDialog" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 backdrop-blur-md" (click)="showAddFriendDialog = false">
+  <div *ngIf="showAddFriendDialog" class="fixed inset-0 z-[150] flex items-center justify-center bg-black/70 backdrop-blur-md" (click)="showAddFriendDialog = false">
     <div class="w-full max-w-sm bg-[#1A1A24] rounded-3xl border border-white/10 p-6 shadow-2xl" (click)="$event.stopPropagation()">
       <h3 class="text-lg font-black mb-4">Add Friend</h3>
       <p class="text-[11px] text-white/40 mb-4">Enter the UID of the user you want to add as a friend. You can find your UID in your profile.</p>
@@ -549,4 +572,5 @@
       </div>
     </div>
   </div>
+
 </div>
