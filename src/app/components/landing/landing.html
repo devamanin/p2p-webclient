@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-[#0E0E11] text-white flex flex-col font-jakarta relative scroll-smooth overflow-x-hidden">
+<div class="min-h-screen bg-[#0E0E11] text-white flex flex-col font-jakarta relative scroll-smooth">
   
   <!-- Navbar -->
   <nav class="flex items-center justify-between px-6 py-4 md:px-12 md:py-6 bg-black/20 backdrop-blur-md fixed top-0 w-full z-50 border-b border-white/5">
@@ -44,132 +44,136 @@
         </a>
       </div>
     </div>
-  </main>
-
-  <!-- Features Section (Horizontal Scroll on Vertical Scroll) -->
-  <section #horizontalSection class="relative w-full h-[500vh] bg-[#16161D] border-t border-white/5">
+  </main>  <!-- Features Section (Vertical Layered Pinning) -->
+  <section #pinSection class="relative w-full h-[600vh] bg-[#0E0E11] border-t border-white/5">
     
-    <div class="sticky top-0 h-screen w-full flex flex-col overflow-hidden">
+    <div class="sticky top-0 h-screen w-full flex flex-col items-center justify-center overflow-hidden">
       
-      <!-- Sticky Background Title (Moves slightly or stays) -->
-      <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.02] select-none">
-        <h2 class="text-[20vw] font-space font-black whitespace-nowrap">WHY BLYNQ?</h2>
+      <!-- Decorative background elements -->
+      <div class="absolute inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute top-[20%] -left-48 w-[600px] h-[600px] bg-[#69DAFF]/5 rounded-full blur-[150px] animate-pulse"></div>
+        <div class="absolute bottom-[20%] -right-48 w-[600px] h-[600px] bg-[#D674FF]/5 rounded-full blur-[150px] animate-pulse"></div>
       </div>
 
-      <!-- Header that stays visible -->
-      <div class="relative z-30 pt-24 px-6 md:px-12 w-full flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div class="max-w-2xl">
-          <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#69DAFF]/10 border border-[#69DAFF]/20 mb-4 text-[#69DAFF] text-xs font-bold tracking-widest uppercase">
-            <span>The Blynq Advantage</span>
-          </div>
-          <h2 class="text-4xl md:text-6xl font-space font-black text-white leading-tight">
-            Why choose <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#69DAFF] to-[#D674FF]">blynq.app?</span>
-          </h2>
+      <!-- Centered Section Header (Always present but fades/scales) -->
+      <div #pinHeader class="absolute top-24 z-50 text-center px-6 transition-all duration-700 ease-out">
+        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#69DAFF]/10 border border-[#69DAFF]/20 mb-4 text-[#69DAFF] text-xs font-bold tracking-widest uppercase transition-colors duration-500">
+          <span>The Blynq Advantage</span>
         </div>
-        <div class="flex items-center space-x-4 mb-2">
-          <div class="h-1 w-32 bg-white/10 rounded-full overflow-hidden">
-            <div #scrollProgress class="h-full bg-gradient-to-r from-[#69DAFF] to-[#D674FF] w-0 transition-all duration-300"></div>
-          </div>
-          <span class="text-white/40 font-space text-xs font-bold tracking-widest">SCROLL TO DISCOVER</span>
-        </div>
+        <h2 class="text-3xl md:text-5xl font-space font-black text-white">Why choose blynq.app?</h2>
       </div>
 
-      <!-- Horizontal Track -->
-      <div #horizontalTrack class="flex-1 flex items-center transition-transform duration-500 ease-out px-[10vw]">
+      <!-- Feature Stack -->
+      <div class="relative w-full max-w-6xl h-[75vh] min-h-[450px] px-6 mt-20">
         
-        <div class="flex items-stretch space-x-12 md:space-x-24">
-          
-          <!-- Feature 1 -->
-          <div class="w-[80vw] md:w-[60vw] lg:w-[45vw] shrink-0">
-            <div class="feature-card bg-gradient-to-br from-white/5 to-transparent p-8 md:p-12 rounded-[3rem] border border-white/10 backdrop-blur-sm h-full flex flex-col justify-between group hover:border-[#69DAFF]/30 transition-colors">
-              <div>
-                <div class="inline-flex w-16 h-16 bg-[#69DAFF]/20 rounded-2xl items-center justify-center mb-8 border border-[#69DAFF]/20 shadow-[0_0_20px_rgba(105,218,255,0.15)]">
-                  <span class="material-icons text-4xl text-[#69DAFF]">psychology</span>
-                </div>
-                <h3 class="text-3xl md:text-4xl font-bold mb-6 font-space">Smart Interest Matching</h3>
-                <p class="text-white/60 text-lg leading-relaxed mb-8">Stop skipping. Our algorithm pairs you based on shared hobbies, location preferences, and demographics so every connection counts.</p>
+        <!-- Feature 1 -->
+        <div #featureCard class="feature-stack-card absolute inset-0 flex items-center justify-center" style="opacity: 1; transform: translateY(0);">
+          <div class="bg-gradient-to-br from-[#16161D] to-[#0E0E11] p-8 md:p-12 rounded-[3rem] border border-white/10 shadow-2xl w-full h-full flex flex-col md:flex-row items-center gap-12 group">
+            <div class="flex-1 text-center md:text-left">
+              <div class="inline-flex w-16 h-16 bg-[#69DAFF]/20 rounded-2xl items-center justify-center mb-6 border border-[#69DAFF]/20 shadow-[0_0_20px_rgba(105,218,255,0.15)]">
+                <span class="material-icons text-4xl text-[#69DAFF]">psychology</span>
               </div>
-              <div class="relative aspect-video bg-black/40 rounded-2xl border border-white/5 overflow-hidden flex items-center justify-center">
-                <span class="material-icons text-5xl text-white/5">insights</span>
-                <div class="absolute inset-0 bg-gradient-to-tr from-[#69DAFF]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <h3 class="text-3xl md:text-4xl font-bold mb-4 font-space">Smart Interest Matching</h3>
+              <p class="text-white/60 text-lg leading-relaxed">Stop skipping. Our algorithm pairs you based on shared hobbies, location preferences, and demographics so every connection counts.</p>
+            </div>
+            <div class="flex-1 w-full">
+              <div class="relative w-full aspect-video bg-black/40 rounded-[2rem] border border-white/5 overflow-hidden flex items-center justify-center">
+                <span class="material-icons text-7xl text-white/5 group-hover:text-[#69DAFF]/20 transition-colors duration-700">insights</span>
+                <div class="absolute inset-0 bg-gradient-to-tr from-[#69DAFF]/5 to-transparent"></div>
               </div>
             </div>
           </div>
+        </div>
 
-          <!-- Feature 2 -->
-          <div class="w-[80vw] md:w-[60vw] lg:w-[45vw] shrink-0">
-            <div class="feature-card bg-gradient-to-br from-white/5 to-transparent p-8 md:p-12 rounded-[3rem] border border-white/10 backdrop-blur-sm h-full flex flex-col justify-between group hover:border-[#D674FF]/30 transition-colors">
-              <div>
-                <div class="inline-flex w-16 h-16 bg-[#D674FF]/20 rounded-2xl items-center justify-center mb-8 border border-[#D674FF]/20 shadow-[0_0_20px_rgba(214,116,255,0.15)]">
-                  <span class="material-icons text-4xl text-[#D674FF]">shield</span>
-                </div>
-                <h3 class="text-3xl md:text-4xl font-bold mb-6 font-space">Built-in Safe Space</h3>
-                <p class="text-white/60 text-lg leading-relaxed mb-8">We prioritize your safety above all else with active moderation tools, immediate blocking, and strict community standards.</p>
+        <!-- Feature 2 -->
+        <div #featureCard class="feature-stack-card absolute inset-0 flex items-center justify-center" style="opacity: 0; transform: translateY(100px);">
+          <div class="bg-gradient-to-br from-[#1A1A24] to-[#16161D] p-8 md:p-12 rounded-[3rem] border border-white/10 shadow-2xl w-full h-full flex flex-col md:flex-row items-center gap-12 group">
+            <div class="flex-1 text-center md:text-left">
+              <div class="inline-flex w-16 h-16 bg-[#D674FF]/20 rounded-2xl items-center justify-center mb-6 border border-[#D674FF]/20 shadow-[0_0_20px_rgba(214,116,255,0.15)]">
+                <span class="material-icons text-4xl text-[#D674FF]">shield</span>
               </div>
-              <div class="relative aspect-video bg-black/40 rounded-2xl border border-white/5 overflow-hidden flex items-center justify-center">
-                <span class="material-icons text-5xl text-white/5">security</span>
-                <div class="absolute inset-0 bg-gradient-to-tr from-[#D674FF]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <h3 class="text-3xl md:text-4xl font-bold mb-4 font-space">Built-in Safe Space</h3>
+              <p class="text-white/60 text-lg leading-relaxed">We prioritize your safety above all else with active moderation tools, immediate blocking, and strict community standards.</p>
+            </div>
+            <div class="flex-1 w-full">
+              <div class="relative w-full aspect-video bg-black/40 rounded-[2rem] border border-white/5 overflow-hidden flex items-center justify-center">
+                <span class="material-icons text-7xl text-white/5 group-hover:text-[#D674FF]/20 transition-colors duration-700">security</span>
+                <div class="absolute inset-0 bg-gradient-to-tr from-[#D674FF]/5 to-transparent"></div>
               </div>
             </div>
           </div>
+        </div>
 
-          <!-- Feature 3 -->
-          <div class="w-[80vw] md:w-[60vw] lg:w-[45vw] shrink-0">
-            <div class="feature-card bg-gradient-to-br from-white/5 to-transparent p-8 md:p-12 rounded-[3rem] border border-white/10 backdrop-blur-sm h-full flex flex-col justify-between group hover:border-[#4ADE80]/30 transition-colors">
-              <div>
-                <div class="inline-flex w-16 h-16 bg-[#4ADE80]/20 rounded-2xl items-center justify-center mb-8 border border-[#4ADE80]/20 shadow-[0_0_20px_rgba(74,222,128,0.15)]">
-                  <span class="material-icons text-4xl text-[#4ADE80]">monetization_on</span>
-                </div>
-                <h3 class="text-3xl md:text-4xl font-bold mb-6 font-space">Reward Economy</h3>
-                <p class="text-white/60 text-lg leading-relaxed mb-8">Earn coins by watching ads or daily logins to unlock premium matching filters. A fair system that rewards you for participating.</p>
+        <!-- Feature 3 -->
+        <div #featureCard class="feature-stack-card absolute inset-0 flex items-center justify-center" style="opacity: 0; transform: translateY(100px);">
+          <div class="bg-gradient-to-br from-[#16161D] to-[#0E0E11] p-8 md:p-12 rounded-[3rem] border border-white/10 shadow-2xl w-full h-full flex flex-col md:flex-row items-center gap-12 group">
+            <div class="flex-1 text-center md:text-left">
+              <div class="inline-flex w-16 h-16 bg-[#4ADE80]/20 rounded-2xl items-center justify-center mb-6 border border-[#4ADE80]/20 shadow-[0_0_20px_rgba(74,222,128,0.15)]">
+                <span class="material-icons text-4xl text-[#4ADE80]">monetization_on</span>
               </div>
-              <div class="relative aspect-video bg-black/40 rounded-2xl border border-white/5 overflow-hidden flex items-center justify-center">
-                <span class="material-icons text-5xl text-white/5">account_balance_wallet</span>
-                <div class="absolute inset-0 bg-gradient-to-tr from-[#4ADE80]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <h3 class="text-3xl md:text-4xl font-bold mb-4 font-space">Reward Economy</h3>
+              <p class="text-white/60 text-lg leading-relaxed">Earn coins by watching ads or daily logins to unlock premium matching filters. A fair system that rewards you for participating.</p>
+            </div>
+            <div class="flex-1 w-full">
+              <div class="relative w-full aspect-video bg-black/40 rounded-[2rem] border border-white/5 overflow-hidden flex items-center justify-center">
+                <span class="material-icons text-7xl text-white/5 group-hover:text-[#4ADE80]/20 transition-colors duration-700">account_balance_wallet</span>
+                <div class="absolute inset-0 bg-gradient-to-tr from-[#4ADE80]/5 to-transparent"></div>
               </div>
             </div>
           </div>
+        </div>
 
-          <!-- Feature 4 -->
-          <div class="w-[80vw] md:w-[60vw] lg:w-[45vw] shrink-0">
-            <div class="feature-card bg-gradient-to-br from-white/5 to-transparent p-8 md:p-12 rounded-[3rem] border border-white/10 backdrop-blur-sm h-full flex flex-col justify-between group hover:border-[#FACC15]/30 transition-colors">
-              <div>
-                <div class="inline-flex w-16 h-16 bg-[#FACC15]/20 rounded-2xl items-center justify-center mb-8 border border-[#FACC15]/20 shadow-[0_0_20px_rgba(250,204,21,0.15)]">
-                  <span class="material-icons text-4xl text-[#FACC15]">location_on</span>
-                </div>
-                <h3 class="text-3xl md:text-4xl font-bold mb-6 font-space">Real Mode</h3>
-                <p class="text-white/60 text-lg leading-relaxed mb-8">Discover people near you with our close-proximity based matching. Connect with locals who share your vibe.</p>
+        <!-- Feature 4 -->
+        <div #featureCard class="feature-stack-card absolute inset-0 flex items-center justify-center" style="opacity: 0; transform: translateY(100px);">
+          <div class="bg-gradient-to-br from-[#1A1A24] to-[#16161D] p-8 md:p-12 rounded-[3rem] border border-white/10 shadow-2xl w-full h-full flex flex-col md:flex-row items-center gap-12 group">
+            <div class="flex-1 text-center md:text-left">
+              <div class="inline-flex w-16 h-16 bg-[#FACC15]/20 rounded-2xl items-center justify-center mb-6 border border-[#FACC15]/20 shadow-[0_0_20px_rgba(250,204,21,0.15)]">
+                <span class="material-icons text-4xl text-[#FACC15]">location_on</span>
               </div>
-              <div class="relative aspect-video bg-black/40 rounded-2xl border border-white/5 overflow-hidden flex items-center justify-center">
-                <span class="material-icons text-5xl text-white/5">map</span>
-                <div class="absolute inset-0 bg-gradient-to-tr from-[#FACC15]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <h3 class="text-3xl md:text-4xl font-bold mb-4 font-space">Real Mode</h3>
+              <p class="text-white/60 text-lg leading-relaxed">Discover people near you with our close-proximity based matching. Connect with locals who share your vibe.</p>
+            </div>
+            <div class="flex-1 w-full">
+              <div class="relative w-full aspect-video bg-black/40 rounded-[2rem] border border-white/5 overflow-hidden flex items-center justify-center">
+                <span class="material-icons text-7xl text-white/5 group-hover:text-[#FACC15]/20 transition-colors duration-700">map</span>
+                <div class="absolute inset-0 bg-gradient-to-tr from-[#FACC15]/5 to-transparent"></div>
               </div>
             </div>
           </div>
+        </div>
 
-          <!-- Feature 5 -->
-          <div class="w-[80vw] md:w-[60vw] lg:w-[45vw] shrink-0">
-            <div class="feature-card bg-gradient-to-br from-white/5 to-transparent p-8 md:p-12 rounded-[3rem] border border-white/10 backdrop-blur-sm h-full flex flex-col justify-between group hover:border-[#F472B6]/30 transition-colors">
-              <div>
-                <div class="inline-flex w-16 h-16 bg-[#F472B6]/20 rounded-2xl items-center justify-center mb-8 border border-[#F472B6]/20 shadow-[0_0_20px_rgba(244,114,182,0.15)]">
-                  <span class="material-icons text-4xl text-[#F472B6]">group_add</span>
-                </div>
-                <h3 class="text-3xl md:text-4xl font-bold mb-6 font-space">Stay Connected</h3>
-                <p class="text-white/60 text-lg leading-relaxed mb-8">Hit it off with someone? Send a friend request to stay in touch, chat offline, and call them directly later.</p>
+        <!-- Feature 5 -->
+        <div #featureCard class="feature-stack-card absolute inset-0 flex items-center justify-center" style="opacity: 0; transform: translateY(100px);">
+          <div class="bg-gradient-to-br from-[#16161D] to-[#0E0E11] p-8 md:p-12 rounded-[3rem] border border-white/10 shadow-2xl w-full h-full flex flex-col md:flex-row items-center gap-12 group">
+            <div class="flex-1 text-center md:text-left">
+              <div class="inline-flex w-16 h-16 bg-[#F472B6]/20 rounded-2xl items-center justify-center mb-6 border border-[#F472B6]/20 shadow-[0_0_20px_rgba(244,114,182,0.15)]">
+                <span class="material-icons text-4xl text-[#F472B6]">group_add</span>
               </div>
-              <div class="relative aspect-video bg-black/40 rounded-2xl border border-white/5 overflow-hidden flex items-center justify-center">
-                <span class="material-icons text-5xl text-white/5">connect_without_contact</span>
-                <div class="absolute inset-0 bg-gradient-to-tr from-[#F472B6]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <h3 class="text-3xl md:text-4xl font-bold mb-4 font-space">Stay Connected</h3>
+              <p class="text-white/60 text-lg leading-relaxed">Hit it off with someone? Send a friend request to stay in touch, chat offline, and call them directly later.</p>
+            </div>
+            <div class="flex-1 w-full">
+              <div class="relative w-full aspect-video bg-black/40 rounded-[2rem] border border-white/5 overflow-hidden flex items-center justify-center">
+                <span class="material-icons text-7xl text-white/5 group-hover:text-[#F472B6]/20 transition-colors duration-700">connect_without_contact</span>
+                <div class="absolute inset-0 bg-gradient-to-tr from-[#F472B6]/5 to-transparent"></div>
               </div>
             </div>
           </div>
-
         </div>
 
       </div>
 
-      <!-- Padding at bottom -->
-      <div class="h-24 shrink-0"></div>
+      <!-- Scroll Indicator Dot -->
+      <div class="absolute bottom-12 flex flex-col items-center space-y-4">
+        <div class="flex space-x-2">
+          <div #dot class="w-2 h-2 rounded-full bg-white/20 transition-all duration-500"></div>
+          <div #dot class="w-2 h-2 rounded-full bg-white/20 transition-all duration-500"></div>
+          <div #dot class="w-2 h-2 rounded-full bg-white/20 transition-all duration-500"></div>
+          <div #dot class="w-2 h-2 rounded-full bg-white/20 transition-all duration-500"></div>
+          <div #dot class="w-2 h-2 rounded-full bg-white/20 transition-all duration-500"></div>
+        </div>
+        <span class="text-[10px] font-space font-bold text-white/20 tracking-[4px] uppercase">Scroll Through Features</span>
+      </div>
 
     </div>
 

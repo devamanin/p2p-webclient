@@ -11,16 +11,17 @@ import { RouterLink } from '@angular/router';
 })
 export class LandingComponent implements AfterViewInit, OnDestroy {
   @ViewChildren('revealItem') revealItems!: QueryList<ElementRef>;
-  @ViewChild('horizontalSection') horizontalSection!: ElementRef;
-  @ViewChild('horizontalTrack') horizontalTrack!: ElementRef;
-  @ViewChild('scrollProgress') scrollProgress!: ElementRef;
+  @ViewChildren('featureCard') featureCards!: QueryList<ElementRef>;
+  @ViewChildren('dot') dots!: QueryList<ElementRef>;
+  @ViewChild('pinSection') pinSection!: ElementRef;
+  @ViewChild('pinHeader') pinHeader!: ElementRef;
 
   private observer: IntersectionObserver | null = null;
   private scrollListener: any;
 
   ngAfterViewInit() {
     this.setupRevealObserver();
-    this.setupHorizontalScroll();
+    this.setupPinScroll();
   }
 
   private setupRevealObserver() {
@@ -41,33 +42,97 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  private setupHorizontalScroll() {
+  private setupPinScroll() {
+    const cardColors = ['#69DAFF', '#D674FF', '#4ADE80', '#FACC15', '#F472B6'];
+
     this.scrollListener = () => {
-      if (!this.horizontalSection || !this.horizontalTrack) return;
+      if (!this.pinSection || !this.featureCards || !this.dots || !this.pinHeader) return;
 
-      const section = this.horizontalSection.nativeElement;
-      const track = this.horizontalTrack.nativeElement;
-      const progress = this.scrollProgress.nativeElement;
+      const section = this.pinSection.nativeElement;
+      const cards = this.featureCards.toArray();
+      const dotElements = this.dots.toArray();
+      const header = this.pinHeader.nativeElement;
+      const headerTag = header.querySelector('div');
 
-      const sectionTop = section.offsetTop;
+      const rect = section.getBoundingClientRect();
+      const scrollY = window.scrollY;
+      const sectionTop = rect.top + scrollY;
       const sectionHeight = section.offsetHeight;
       const viewportHeight = window.innerHeight;
-      const scrollY = window.scrollY;
 
-      // Calculate how far we've scrolled into the section (0 to 1)
-      let scrollPercent = (scrollY - sectionTop) / (sectionHeight - viewportHeight);
-      scrollPercent = Math.max(0, Math.min(1, scrollPercent));
+      // Calculate overall progress through the section (0 to 1)
+      let progress = (scrollY - sectionTop) / (sectionHeight - viewportHeight);
+      progress = Math.max(0, Math.min(1, progress));
 
-      // Map progress to transform (0% to -maxScroll)
-      const maxScroll = track.scrollWidth - window.innerWidth;
-      const translateX = scrollPercent * maxScroll;
+      const numCards = cards.length;
+      
+      // Update each card based on its index
+      cards.forEach((cardRef, index) => {
+        const card = cardRef.nativeElement;
+        const dot = dotElements[index]?.nativeElement;
+        if (!dot) return;
+        
+        // This card's specific active range
+        const start = index / numCards;
+        const end = (index + 1) / numCards;
+        
+        // Use a small buffer to ensure the last card stays visible at the very end
+        const isActive = index === numCards - 1 
+          ? progress >= start && progress <= 1.0
+          : progress >= start && progress < end;
 
-      track.style.transform = `translateX(-${translateX}px)`;
-      progress.style.width = `${scrollPercent * 100}%`;
+        if (isActive) {
+          // Current card is active
+          card.style.opacity = '1';
+          card.style.transform = 'translateY(0) scale(1)';
+          card.style.zIndex = '50';
+          card.style.pointerEvents = 'auto';
+          
+          // Update dot style
+          dot.style.backgroundColor = cardColors[index];
+          dot.style.width = '1rem'; // w-4
+          dot.classList.remove('bg-white/20');
+          
+          // Update header tag color if it exists
+          if (headerTag) {
+            headerTag.style.borderColor = `${cardColors[index]}33`; // 20% opacity
+            headerTag.style.backgroundColor = `${cardColors[index]}1a`; // 10% opacity
+            headerTag.style.color = cardColors[index];
+          }
+        } else if (progress >= end) {
+          // Card has been passed
+          card.style.opacity = '0';
+          card.style.transform = 'translateY(-60px) scale(0.95)';
+          card.style.zIndex = '10';
+          card.style.pointerEvents = 'none';
+          
+          // Reset dot style
+          dot.style.backgroundColor = '';
+          dot.style.width = '0.5rem'; // w-2
+          dot.classList.add('bg-white/20');
+        } else {
+          // Card is upcoming
+          card.style.opacity = '0';
+          card.style.transform = 'translateY(60px) scale(1.05)';
+          card.style.zIndex = '10';
+          card.style.pointerEvents = 'none';
+          
+          // Reset dot style
+          dot.style.backgroundColor = '';
+          dot.style.width = '0.5rem'; // w-2
+          dot.classList.add('bg-white/20');
+        }
+      });
+
+      // Subtle header animation
+      const headerScale = 1 - (progress * 0.05);
+      const headerOpacity = 1 - (progress * 0.3);
+      header.style.transform = `scale(${headerScale})`;
+      header.style.opacity = `${headerOpacity}`;
     };
 
     window.addEventListener('scroll', this.scrollListener, { passive: true });
-    // Initial call
+    // Initial call with a small delay to ensure layout is ready
     setTimeout(() => this.scrollListener(), 100);
   }
 

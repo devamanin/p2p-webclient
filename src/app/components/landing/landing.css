@@ -2,6 +2,19 @@
   display: block;
 }
 
+/* Feature Stack Specifics */
+.feature-stack-card {
+  will-change: transform, opacity;
+  pointer-events: none;
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), 
+              transform 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+              z-index 0.8s step-end;
+}
+
+.feature-stack-card > div {
+  pointer-events: auto;
+}
+
 /* Initial state of elements before they scroll into view */
 .reveal-item {
   opacity: 0;
@@ -17,16 +30,11 @@
   transform: translateY(0) scale(1);
 }
 
-/* Horizontal Scroll Specifics */
-#horizontalTrack {
-  will-change: transform;
+/* Vertical Features Styling */
+.feature-card-icon {
+  transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.feature-card {
-  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), 
-              border-color 0.5s ease;
-}
-
-.feature-card:hover {
-  transform: translateY(-8px);
+.feature-card:hover .feature-card-icon {
+  transform: scale(1.1) rotate(5deg);
 }
