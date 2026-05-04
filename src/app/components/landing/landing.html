@@ -1,0 +1,208 @@
+<div class="min-h-screen bg-[#0E0E11] text-white flex flex-col font-jakarta relative scroll-smooth overflow-x-hidden">
+  
+  <!-- Navbar -->
+  <nav class="flex items-center justify-between px-6 py-4 md:px-12 md:py-6 bg-black/20 backdrop-blur-md fixed top-0 w-full z-50 border-b border-white/5">
+    <div class="flex items-center space-x-2 cursor-pointer" routerLink="/">
+      <img src="assets/logo.svg" alt="blynq.app logo" class="w-8 h-8 drop-shadow-[0_0_12px_rgba(105,218,255,0.8)]">
+      <span class="font-space font-bold text-xl tracking-[2px] text-white drop-shadow-[0_0_12px_rgba(105,218,255,0.8)]">blynq.app</span>
+    </div>
+    <div class="flex items-center space-x-6">
+      <a routerLink="/careers" class="text-sm font-medium text-white/60 hover:text-white transition-colors hidden md:block">Careers</a>
+      <a routerLink="/safety-standards" class="text-sm font-medium text-white/60 hover:text-white transition-colors hidden md:block">Safety</a>
+      <a routerLink="/login" class="bg-gradient-to-r from-[#69DAFF] to-[#D674FF] text-white px-5 py-2 rounded-full font-bold text-sm hover:scale-105 transition-transform shadow-lg shadow-[#69DAFF]/20">
+        Launch App
+      </a>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <main class="w-full min-h-screen shrink-0 flex flex-col items-center justify-center text-center px-4 relative pt-20">
+    <!-- Animated background blobs -->
+    <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-[#69DAFF]/10 rounded-full blur-[100px] pointer-events-none"></div>
+    <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#D674FF]/10 rounded-full blur-[100px] pointer-events-none"></div>
+
+    <div class="relative z-10 max-w-4xl mx-auto flex flex-col items-center">
+      <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-8 text-[#D674FF] text-xs font-bold tracking-widest uppercase">
+        <span class="material-icons text-sm">stars</span>
+        <span>The Next Generation of Video Chat</span>
+      </div>
+      
+      <h1 class="text-5xl md:text-7xl font-space font-black tracking-tight mb-6 leading-tight">
+        Connect with the <br>
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#69DAFF] to-[#D674FF]">World, Instantly.</span>
+      </h1>
+      
+      <p class="text-lg md:text-xl text-white/60 max-w-2xl mb-10 font-medium leading-relaxed">
+        Experience high-quality, ultra-fast video calls with people who share your passions. 
+        No random chaos—just meaningful connections powered by our smart matching algorithm.
+      </p>
+      
+      <div class="flex flex-col sm:flex-row items-center gap-4">
+        <a routerLink="/login" class="flex items-center justify-center space-x-2 bg-gradient-to-r from-[#69DAFF] to-[#D674FF] text-white px-8 py-4 rounded-full font-black text-lg hover:scale-105 transition-transform shadow-[0_0_30px_rgba(105,218,255,0.3)] w-full sm:w-auto">
+          <span class="material-icons">videocam</span>
+          <span>Start Connecting Now</span>
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <!-- Features Section (Horizontal Scroll on Vertical Scroll) -->
+  <section #horizontalSection class="relative w-full h-[500vh] bg-[#16161D] border-t border-white/5">
+    
+    <div class="sticky top-0 h-screen w-full flex flex-col overflow-hidden">
+      
+      <!-- Sticky Background Title (Moves slightly or stays) -->
+      <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.02] select-none">
+        <h2 class="text-[20vw] font-space font-black whitespace-nowrap">WHY BLYNQ?</h2>
+      </div>
+
+      <!-- Header that stays visible -->
+      <div class="relative z-30 pt-24 px-6 md:px-12 w-full flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div class="max-w-2xl">
+          <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#69DAFF]/10 border border-[#69DAFF]/20 mb-4 text-[#69DAFF] text-xs font-bold tracking-widest uppercase">
+            <span>The Blynq Advantage</span>
+          </div>
+          <h2 class="text-4xl md:text-6xl font-space font-black text-white leading-tight">
+            Why choose <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#69DAFF] to-[#D674FF]">blynq.app?</span>
+          </h2>
+        </div>
+        <div class="flex items-center space-x-4 mb-2">
+          <div class="h-1 w-32 bg-white/10 rounded-full overflow-hidden">
+            <div #scrollProgress class="h-full bg-gradient-to-r from-[#69DAFF] to-[#D674FF] w-0 transition-all duration-300"></div>
+          </div>
+          <span class="text-white/40 font-space text-xs font-bold tracking-widest">SCROLL TO DISCOVER</span>
+        </div>
+      </div>
+
+      <!-- Horizontal Track -->
+      <div #horizontalTrack class="flex-1 flex items-center transition-transform duration-500 ease-out px-[10vw]">
+        
+        <div class="flex items-stretch space-x-12 md:space-x-24">
+          
+          <!-- Feature 1 -->
+          <div class="w-[80vw] md:w-[60vw] lg:w-[45vw] shrink-0">
+            <div class="feature-card bg-gradient-to-br from-white/5 to-transparent p-8 md:p-12 rounded-[3rem] border border-white/10 backdrop-blur-sm h-full flex flex-col justify-between group hover:border-[#69DAFF]/30 transition-colors">
+              <div>
+                <div class="inline-flex w-16 h-16 bg-[#69DAFF]/20 rounded-2xl items-center justify-center mb-8 border border-[#69DAFF]/20 shadow-[0_0_20px_rgba(105,218,255,0.15)]">
+                  <span class="material-icons text-4xl text-[#69DAFF]">psychology</span>
+                </div>
+                <h3 class="text-3xl md:text-4xl font-bold mb-6 font-space">Smart Interest Matching</h3>
+                <p class="text-white/60 text-lg leading-relaxed mb-8">Stop skipping. Our algorithm pairs you based on shared hobbies, location preferences, and demographics so every connection counts.</p>
+              </div>
+              <div class="relative aspect-video bg-black/40 rounded-2xl border border-white/5 overflow-hidden flex items-center justify-center">
+                <span class="material-icons text-5xl text-white/5">insights</span>
+                <div class="absolute inset-0 bg-gradient-to-tr from-[#69DAFF]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Feature 2 -->
+          <div class="w-[80vw] md:w-[60vw] lg:w-[45vw] shrink-0">
+            <div class="feature-card bg-gradient-to-br from-white/5 to-transparent p-8 md:p-12 rounded-[3rem] border border-white/10 backdrop-blur-sm h-full flex flex-col justify-between group hover:border-[#D674FF]/30 transition-colors">
+              <div>
+                <div class="inline-flex w-16 h-16 bg-[#D674FF]/20 rounded-2xl items-center justify-center mb-8 border border-[#D674FF]/20 shadow-[0_0_20px_rgba(214,116,255,0.15)]">
+                  <span class="material-icons text-4xl text-[#D674FF]">shield</span>
+                </div>
+                <h3 class="text-3xl md:text-4xl font-bold mb-6 font-space">Built-in Safe Space</h3>
+                <p class="text-white/60 text-lg leading-relaxed mb-8">We prioritize your safety above all else with active moderation tools, immediate blocking, and strict community standards.</p>
+              </div>
+              <div class="relative aspect-video bg-black/40 rounded-2xl border border-white/5 overflow-hidden flex items-center justify-center">
+                <span class="material-icons text-5xl text-white/5">security</span>
+                <div class="absolute inset-0 bg-gradient-to-tr from-[#D674FF]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Feature 3 -->
+          <div class="w-[80vw] md:w-[60vw] lg:w-[45vw] shrink-0">
+            <div class="feature-card bg-gradient-to-br from-white/5 to-transparent p-8 md:p-12 rounded-[3rem] border border-white/10 backdrop-blur-sm h-full flex flex-col justify-between group hover:border-[#4ADE80]/30 transition-colors">
+              <div>
+                <div class="inline-flex w-16 h-16 bg-[#4ADE80]/20 rounded-2xl items-center justify-center mb-8 border border-[#4ADE80]/20 shadow-[0_0_20px_rgba(74,222,128,0.15)]">
+                  <span class="material-icons text-4xl text-[#4ADE80]">monetization_on</span>
+                </div>
+                <h3 class="text-3xl md:text-4xl font-bold mb-6 font-space">Reward Economy</h3>
+                <p class="text-white/60 text-lg leading-relaxed mb-8">Earn coins by watching ads or daily logins to unlock premium matching filters. A fair system that rewards you for participating.</p>
+              </div>
+              <div class="relative aspect-video bg-black/40 rounded-2xl border border-white/5 overflow-hidden flex items-center justify-center">
+                <span class="material-icons text-5xl text-white/5">account_balance_wallet</span>
+                <div class="absolute inset-0 bg-gradient-to-tr from-[#4ADE80]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Feature 4 -->
+          <div class="w-[80vw] md:w-[60vw] lg:w-[45vw] shrink-0">
+            <div class="feature-card bg-gradient-to-br from-white/5 to-transparent p-8 md:p-12 rounded-[3rem] border border-white/10 backdrop-blur-sm h-full flex flex-col justify-between group hover:border-[#FACC15]/30 transition-colors">
+              <div>
+                <div class="inline-flex w-16 h-16 bg-[#FACC15]/20 rounded-2xl items-center justify-center mb-8 border border-[#FACC15]/20 shadow-[0_0_20px_rgba(250,204,21,0.15)]">
+                  <span class="material-icons text-4xl text-[#FACC15]">location_on</span>
+                </div>
+                <h3 class="text-3xl md:text-4xl font-bold mb-6 font-space">Real Mode</h3>
+                <p class="text-white/60 text-lg leading-relaxed mb-8">Discover people near you with our close-proximity based matching. Connect with locals who share your vibe.</p>
+              </div>
+              <div class="relative aspect-video bg-black/40 rounded-2xl border border-white/5 overflow-hidden flex items-center justify-center">
+                <span class="material-icons text-5xl text-white/5">map</span>
+                <div class="absolute inset-0 bg-gradient-to-tr from-[#FACC15]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Feature 5 -->
+          <div class="w-[80vw] md:w-[60vw] lg:w-[45vw] shrink-0">
+            <div class="feature-card bg-gradient-to-br from-white/5 to-transparent p-8 md:p-12 rounded-[3rem] border border-white/10 backdrop-blur-sm h-full flex flex-col justify-between group hover:border-[#F472B6]/30 transition-colors">
+              <div>
+                <div class="inline-flex w-16 h-16 bg-[#F472B6]/20 rounded-2xl items-center justify-center mb-8 border border-[#F472B6]/20 shadow-[0_0_20px_rgba(244,114,182,0.15)]">
+                  <span class="material-icons text-4xl text-[#F472B6]">group_add</span>
+                </div>
+                <h3 class="text-3xl md:text-4xl font-bold mb-6 font-space">Stay Connected</h3>
+                <p class="text-white/60 text-lg leading-relaxed mb-8">Hit it off with someone? Send a friend request to stay in touch, chat offline, and call them directly later.</p>
+              </div>
+              <div class="relative aspect-video bg-black/40 rounded-2xl border border-white/5 overflow-hidden flex items-center justify-center">
+                <span class="material-icons text-5xl text-white/5">connect_without_contact</span>
+                <div class="absolute inset-0 bg-gradient-to-tr from-[#F472B6]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Padding at bottom -->
+      <div class="h-24 shrink-0"></div>
+
+    </div>
+
+  </section>
+
+  <!-- The Comparison -->
+  <div class="w-full min-h-[80vh] shrink-0 flex items-center justify-center px-6 py-20 bg-[#1A1A22]">
+    <div #revealItem class="reveal-item max-w-6xl w-full bg-gradient-to-br from-white/5 to-transparent rounded-[40px] p-8 md:p-12 border border-white/10 relative overflow-hidden">
+      <div class="absolute top-0 right-0 p-8 opacity-10">
+        <span class="material-icons text-9xl">compare_arrows</span>
+      </div>
+      <h3 class="text-2xl md:text-3xl font-space font-bold mb-6 relative z-10">Blynq.app vs Monkey.app</h3>
+      <p class="text-white/70 text-lg leading-relaxed max-w-3xl relative z-10">
+        Unlike Monkey.app, which often relies on chaotic, text-only filters and unpredictable matchmaking, 
+        <strong>blynq.app</strong> is designed for quality over pure randomness. We integrate a rich visual interface,
+        detailed user preferences, and a robust WebRTC backend that guarantees lower latency. With blynq.app, you aren't
+        just swiping through strangers; you're discovering peers in a moderated, rewarding, and highly customizable environment.
+      </p>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="w-full shrink-0 border-t border-white/5 py-12 px-6 bg-[#0E0E11]">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+      <div class="flex items-center space-x-2">
+        <img src="assets/logo.svg" alt="logo" class="w-6 h-6 grayscale opacity-50">
+        <span class="font-space font-bold text-white/50">© 2026 blynq.app</span>
+      </div>
+      <div class="flex space-x-6 text-sm font-medium text-white/40">
+        <a routerLink="/careers" class="hover:text-white transition-colors">Careers</a>
+        <a routerLink="/privacy-policy" class="hover:text-white transition-colors">Privacy Policy</a>
+        <a routerLink="/safety-standards" class="hover:text-white transition-colors">Safety Standards</a>
+      </div>
+    </div>
+  </footer>
+</div>

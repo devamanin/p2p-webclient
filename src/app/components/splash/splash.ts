@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { UserPreferencesService } from '../../services/user-preferences.service';
 import { Subscription, timer } from 'rxjs';
@@ -8,7 +8,7 @@ import { Subscription, timer } from 'rxjs';
 @Component({
   selector: 'app-splash',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './splash.html',
   styleUrl: './splash.css'
 })

@@ -1,0 +1,32 @@
+:host {
+  display: block;
+}
+
+/* Initial state of elements before they scroll into view */
+.reveal-item {
+  opacity: 0;
+  transform: translateY(30px) scale(0.98);
+  transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), 
+              transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
+}
+
+/* State when element comes into view */
+.reveal-item.is-revealed {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* Horizontal Scroll Specifics */
+#horizontalTrack {
+  will-change: transform;
+}
+
+.feature-card {
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), 
+              border-color 0.5s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-8px);
+}
