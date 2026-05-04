@@ -5,10 +5,12 @@ import { SignalingService } from '../../services/signaling.service';
 import { UserPreferencesService } from '../../services/user-preferences.service';
 import { Subscription } from 'rxjs';
 
+import { AdCoinPill } from '../ad-coin-pill/ad-coin-pill';
+
 @Component({
   selector: 'app-matching',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, AdCoinPill],
   templateUrl: './matching.html',
   styleUrl: './matching.css'
 })

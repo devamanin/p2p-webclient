@@ -1,0 +1,10 @@
+# AppLixir Authorized Sellers
+# Replace [YOUR_ACCOUNT_ID] with your ID from AppLixir Dashboard
+applixir.com, [YOUR_ACCOUNT_ID], DIRECT
+
+# Recommended demanda partners (verify with latest AppLixir docs)
+google.com, pub-7334713811106671, RESELLER, f08c47fec0942fa0
+rubiconproject.com, 17834, RESELLER, 0bfd66d529a55807
+appnexus.com, 7373, RESELLER, f5a4951cbf381a11
+openx.com, 537152989, RESELLER, 6a695866051056e5
+pubmatic.com, 156935, RESELLER, 5d62403b106f3109

@@ -9,14 +9,18 @@ import { FriendService, Friend, FriendRequest } from '../../services/friend.serv
 import { ChatService, ChatPreview, ChatMessage } from '../../services/chat.service';
 import { Subscription } from 'rxjs';
 
+declare var adsbygoogle: any;
+
 // States: 'idle' | 'searching' | 'connected'
 type AppState = 'idle' | 'searching' | 'connected';
 type FriendStatus = 'none' | 'sent' | 'received' | 'friends';
 
+import { AdCoinPill } from '../ad-coin-pill/ad-coin-pill';
+
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, AdCoinPill],
   templateUrl: './home.html',
   styleUrl: './home.css'
 })
@@ -142,6 +146,14 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
       this.isFullScreen = !!document.fullscreenElement;
       this.cdr.detectChanges();
     });
+
+    // Initialize Google AdSense units
+    try {
+      (window as any).adsbygoogle = (window as any).adsbygoogle || [];
+      (window as any).adsbygoogle.push({});
+    } catch (e) {
+      console.warn('[Home] AdSense initialization failed:', e);
+    }
   }
 
   private async startLocalCamera() {
@@ -163,10 +175,9 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     this.subscriptions.push(
       this.signalingService.peerJoined$.subscribe(() => {
         this.ngZone.run(() => {
-          console.log('[Home] Peer joined!');
+          console.log('[Home] Peer joined, updating UI...');
           this.remoteMetadata = this.signalingService.remoteMetadata;
-          this.state = 'connected';
-          this.cdr.detectChanges();
+          this.onMatched(); // Deduct coins and update state
         });
       })
     );
@@ -178,7 +189,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
           if (stream) {
             console.log('[Home] Remote stream received');
             this.isConnected = true;
-            this.state = 'connected';
+            this.state = 'connected'; // Ensure state is connected if we have video
             this.remoteMetadata = this.signalingService.remoteMetadata;
             if (this.remoteVideo?.nativeElement) {
               this.remoteVideo.nativeElement.srcObject = stream;
@@ -276,8 +287,8 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.coinCost = this.calculateCost();
     if (this.prefs.coins < this.coinCost) {
-      console.warn(`[Home] Insufficient coins (${this.prefs.coins}). Auto-granting 200 coins for testing.`);
-      this.prefs.addCoins(200);
+      alert(`Insufficient coins! You need ${this.coinCost} coins to start a match. Watch an ad to earn more.`);
+      return;
     }
 
     this.state = 'searching';
@@ -396,7 +407,18 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private onMatched() {
+    if (this.state === 'connected') return;
+    
     console.log('[Home] *** MATCH FOUND ***');
+    
+    // Deduct coins only when a real match is found
+    const success = this.prefs.spendCoins(this.coinCost);
+    if (!success) {
+      console.error('[Home] Coin deduction failed on match.');
+      this.cancelSearch();
+      return;
+    }
+
     this.state = 'connected';
     this.friendStatus = 'none'; // Reset for new match
     this.inCallMessages = []; // Reset in-call chat
@@ -405,7 +427,6 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     this.hasUnreadInCallMessages = false;
     this.signalingService.isMatched = true;
     this.remoteMetadata = this.signalingService.remoteMetadata;
-    this.prefs.spendCoins(this.coinCost);
     this.stopMatchingTimers();
     this.cdr.detectChanges();
   }
@@ -653,14 +674,20 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   calculateCost(): number {
-    let cost = 10;
-    const defaults = ['Gaming', 'Movies', 'Fitness'];
-    const custom = this.prefs.interests.length !== defaults.length || !this.prefs.interests.every(i => defaults.includes(i));
-    if (this.prefs.targetGender !== 'Any Gender' || (this.prefs.locations.length > 0 && !this.prefs.locations.includes('Global')) || custom) cost = 20;
-    return cost;
+    // Normal match: Any Gender, Global Location, Default Interests
+    const isNormalMatch = 
+      this.prefs.targetGender === 'Any Gender' &&
+      (this.prefs.locations.length === 0 || (this.prefs.locations.length === 1 && this.prefs.locations.includes('Global'))) &&
+      this.isDefaultInterests();
+
+    return isNormalMatch ? 10 : 20;
   }
 
-  addFreeCoins() { alert('You earned 50 coins!'); this.prefs.addCoins(50); }
+  private isDefaultInterests(): boolean {
+    const defaults = ['Gaming', 'Movies', 'Fitness'];
+    if (this.prefs.interests.length !== defaults.length) return false;
+    return this.prefs.interests.every(i => defaults.includes(i));
+  }
 
   logout() { this.authService.logout().then(() => this.router.navigate(['/'])); }
 

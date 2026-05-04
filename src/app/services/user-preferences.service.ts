@@ -9,11 +9,25 @@ export class UserPreferencesService {
   private _targetGenderSubject = new BehaviorSubject<string>(localStorage.getItem('targetGender') || 'Any Gender');
   private _myGenderSubject = new BehaviorSubject<string>(localStorage.getItem('myGender') || 'Male');
   private _ageSubject = new BehaviorSubject<number>(parseInt(localStorage.getItem('age') || '18'));
-  private _coinsSubject = new BehaviorSubject<number>(parseInt(localStorage.getItem('coins') || '200'));
+  private _coinsSubject = new BehaviorSubject<number>(this.getInitialCoins());
   private _detectedLocationSubject = new BehaviorSubject<string>(localStorage.getItem('detectedLocation') || 'Global');
   private _interestsSubject = new BehaviorSubject<string[]>(JSON.parse(localStorage.getItem('interests') || '["Gaming", "Movies", "Fitness"]'));
   private _locationsSubject = new BehaviorSubject<string[]>(JSON.parse(localStorage.getItem('locations') || '["Global"]'));
   
+  private getInitialCoins(): number {
+    const today = new Date().toDateString();
+    const lastResetDate = localStorage.getItem('lastResetDate');
+    
+    if (lastResetDate !== today) {
+      console.log('[UserPreferences] Daily reset: Setting coins to 100');
+      localStorage.setItem('lastResetDate', today);
+      localStorage.setItem('coins', '100');
+      return 100;
+    }
+    
+    return parseInt(localStorage.getItem('coins') || '100');
+  }
+
   private getInitialProfilePic(): string | null {
     const p = localStorage.getItem('profilePicture');
     return (p === 'null' || p === 'undefined' || !p) ? null : p;

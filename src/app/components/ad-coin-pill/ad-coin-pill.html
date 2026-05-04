@@ -1,0 +1,17 @@
+<div class="flex items-center gap-2 bg-[#1A1A1E] border border-white/10 rounded-full px-3 py-1.5 cursor-pointer hover:bg-[#252529] transition-all group shadow-lg"
+     (click)="watchAd()"
+     [class.opacity-50]="isAdPlaying()"
+     [class.cursor-not-allowed]="isAdPlaying()">
+  
+  <div class="flex items-center gap-1.5">
+    <span class="material-icons text-[#FFD700] text-sm group-hover:scale-110 transition-transform">monetization_on</span>
+    <span class="text-sm font-bold text-white/90">{{ coins() }}</span>
+  </div>
+
+  <div class="h-3 w-[1px] bg-white/10 mx-0.5"></div>
+
+  <div class="flex items-center gap-1.5">
+    <span class="material-icons text-white/40 text-[14px]">play_circle</span>
+    <span class="text-[10px] font-black text-white/40 uppercase tracking-wider group-hover:text-[#69DAFF] transition-colors">+50</span>
+  </div>
+</div>

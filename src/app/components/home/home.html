@@ -66,6 +66,16 @@
           </div>
         </div>
 
+        <!-- Sidebar Ad Unit -->
+        <div class="my-4 px-2 py-2 bg-black/20 rounded-2xl border border-white/5 overflow-hidden">
+          <ins class="adsbygoogle"
+               style="display:block"
+               data-ad-format="fluid"
+               data-ad-layout-key="-6t+ed+2i-1n-4w"
+               data-ad-client="ca-pub-4905210385091071"
+               data-ad-slot="9267129899"></ins>
+        </div>
+
         <div class="mt-auto"></div>
         <div class="w-full h-px bg-white/5 mt-6 mb-4"></div>
         
@@ -93,14 +103,7 @@
         <div class="hidden md:block"></div>
 
         <div class="flex items-center space-x-2 md:space-x-3">
-          <div class="bg-white/5 border border-white/10 px-3 py-1.5 rounded-full flex items-center space-x-1.5 shadow-lg" title="Coins">
-            <span class="text-amber-400 material-icons text-sm">monetization_on</span>
-            <span class="font-bold text-sm text-white/90">{{ prefs.coins$ | async }}</span>
-          </div>
-          <button (click)="addFreeCoins()" class="bg-[#69DAFF]/10 hover:bg-[#69DAFF] text-[#69DAFF] hover:text-white border border-[#69DAFF]/30 px-3 py-1.5 rounded-full flex items-center space-x-1.5 transition-all active:scale-95 shadow-lg" title="Get Free Coins">
-            <span class="material-icons text-[14px]">play_circle_filled</span>
-            <span class="text-[10px] font-black uppercase tracking-wider">Free</span>
-          </button>
+          <app-ad-coin-pill></app-ad-coin-pill>
           <button (click)="toggleSocialPanel()" class="bg-white/5 hover:bg-white/10 text-white/70 border border-white/10 w-10 h-10 rounded-full flex items-center justify-center transition-all relative shadow-lg" title="Messages">
             <span class="material-icons text-[20px]">forum</span>
             <span *ngIf="pendingRequests.length > 0" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[8px] font-black rounded-full flex items-center justify-center border-2 border-[#0E0E11]">
