@@ -12,22 +12,10 @@ import { RouterLink } from '@angular/router';
 export class CareersComponent {
   jobs = [
     {
-      title: 'Senior WebRTC Engineer',
+      title: 'Campus Ambassador Lead',
       location: 'Remote',
-      type: 'Full-time',
-      description: 'Lead the development of our core real-time communication infrastructure, optimizing latency and reliability.'
-    },
-    {
-      title: 'Full Stack Developer (Angular/Node)',
-      location: 'Remote / Hybrid',
-      type: 'Full-time',
-      description: 'Build and maintain features across our Angular web client and Node.js backend.'
-    },
-    {
-      title: 'Community Safety Specialist',
-      location: 'Remote',
-      type: 'Part-time',
-      description: 'Help us maintain a safe, welcoming environment by reviewing reports and refining our automated safety filters.'
+      type: 'Part-time / Internship',
+      description: 'Lead our campus outreach program, manage a team of student ambassadors, and drive user growth across universities worldwide.'
     }
   ];
 }
