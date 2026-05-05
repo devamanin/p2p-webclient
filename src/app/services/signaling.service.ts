@@ -240,6 +240,20 @@ export class SignalingService {
         console.warn('[Signaling] PeerConnection FAILED - possible ICE/STUN issue');
       }
     };
+    this.peerConnection.oniceconnectionstatechange = () => {
+      console.log('[Signaling] ICE connection state:', this.peerConnection?.iceConnectionState);
+      // Some browsers don't fire onconnectionstatechange reliably.
+      // Use iceConnectionState as a fallback to detect 'connected'.
+      const iceState = this.peerConnection?.iceConnectionState;
+      if (iceState === 'connected' || iceState === 'completed') {
+        this.connectionStateSubject.next('connected');
+      } else if (iceState === 'failed') {
+        this.connectionStateSubject.next('failed');
+      }
+    };
+    this.peerConnection.onicegatheringstatechange = () => {
+      console.log('[Signaling] ICE gathering state:', this.peerConnection?.iceGatheringState);
+    };
     this.peerConnection.ontrack = (event) => {
       console.log('[Signaling] ontrack received:', event.track.kind);
       if (event.streams && event.streams[0]) {
@@ -256,10 +270,20 @@ export class SignalingService {
   }
 
   private async fetchIceServers() {
-    if (this.iceConfiguration.iceServers) return;
+    // Always fetch fresh credentials - TURN tokens expire!
     return new Promise((resolve) => {
       this.socket.emit('get_ice_servers', {}, (data: any) => {
-        this.iceConfiguration = data;
+        console.log('[Signaling] ICE servers received:', JSON.stringify(data));
+        if (data && data.iceServers) {
+          this.iceConfiguration = data;
+        } else {
+          console.warn('[Signaling] Invalid ICE config received, using fallback');
+          this.iceConfiguration = {
+            iceServers: [
+              { urls: ['stun:stun.l.google.com:19302'] }
+            ]
+          };
+        }
         resolve(true);
       });
     });
