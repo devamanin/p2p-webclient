@@ -190,6 +190,20 @@ export class SignalingService {
             await this.peerConnection.setLocalDescription(answer);
             this.socket.emit('send_answer', { room_id: roomId, answer });
 
+            // CRITICAL: The joiner never receives 'peer_joined' (only the creator does).
+            // Without this, ALL of the joiner's ICE candidates (including TURN relay)
+            // would be silently queued in earlyLocalCandidates and NEVER sent.
+            this.isPeerJoined = true;
+            
+            // Flush any ICE candidates that fired during the joinRoom setup
+            if (this.earlyLocalCandidates.length > 0) {
+              console.log(`[Signaling] Joiner flushing ${this.earlyLocalCandidates.length} early local candidates`);
+              this.earlyLocalCandidates.forEach(candidate => {
+                this.socket.emit('send_candidate', { room_id: roomId, candidate });
+              });
+              this.earlyLocalCandidates = [];
+            }
+
             this.isBusy = false;
             resolve(true);
           } catch (e) {
