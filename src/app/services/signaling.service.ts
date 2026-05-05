@@ -40,6 +40,7 @@ export class SignalingService {
   private isPeerJoined = false;
   private isBusy = false;
   private candidateQueue: RTCIceCandidateInit[] = [];
+  private earlyLocalCandidates: RTCIceCandidateInit[] = [];
 
   public get isNegotiating(): boolean {
     return this.isPeerJoined || this.isRemoteDescriptionSet;
@@ -95,6 +96,15 @@ export class SignalingService {
       this.remoteMetadata = data.metadata;
       this.isPeerJoined = true;
       this.peerJoinedSubject.next();
+      
+      // Send any early local candidates now that the peer has joined and we have a roomId
+      if (this.roomId && this.earlyLocalCandidates.length > 0) {
+        console.log(`[Signaling] Sending ${this.earlyLocalCandidates.length} early local candidates...`);
+        this.earlyLocalCandidates.forEach(candidate => {
+          this.socket.emit('send_candidate', { room_id: this.roomId, candidate });
+        });
+        this.earlyLocalCandidates = [];
+      }
     });
 
     this.socket.on('session_ended', (data: any) => {
@@ -122,6 +132,7 @@ export class SignalingService {
     this.isBusy = true;
     this.isRemoteDescriptionSet = false;
     this.candidateQueue = [];
+    this.earlyLocalCandidates = [];
 
     await this.fetchIceServers();
 
@@ -197,8 +208,14 @@ export class SignalingService {
   private setupPeerConnectionListeners() {
     if (!this.peerConnection) return;
     this.peerConnection.onicecandidate = (event) => {
-      if (event.candidate && this.roomId) {
-        this.socket.emit('send_candidate', { room_id: this.roomId, candidate: event.candidate.toJSON() });
+      if (event.candidate) {
+        const candidateJson = event.candidate.toJSON();
+        if (this.roomId && this.isPeerJoined) {
+          this.socket.emit('send_candidate', { room_id: this.roomId, candidate: candidateJson });
+        } else {
+          // If the room isn't ready or peer hasn't joined yet, queue them
+          this.earlyLocalCandidates.push(candidateJson);
+        }
       }
     };
     this.peerConnection.onconnectionstatechange = () => {
@@ -266,6 +283,7 @@ export class SignalingService {
     this.isMatched = false;
     this.isBusy = false;
     this.candidateQueue = [];
+    this.earlyLocalCandidates = [];
     this.connectionStateSubject.next('closed');
 
     // Stop remote video
