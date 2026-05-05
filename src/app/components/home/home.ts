@@ -214,6 +214,26 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
             console.log('[Home] ICE Connection fully established!');
             this.isConnected = true;
             this.cdr.detectChanges();
+            
+            // 🐛 FIX: Force the browser to render the video. 
+            // WebRTC often delivers the audio track first and the video track a few milliseconds later.
+            // If the video track arrives after srcObject is set, the browser might show a black screen.
+            // Re-assigning the stream forces the browser's media pipeline to refresh and decode the video.
+            setTimeout(() => {
+              if (this.remoteVideo?.nativeElement && this.signalingService.remoteStream) {
+                const video = this.remoteVideo.nativeElement;
+                const stream = this.signalingService.remoteStream;
+                
+                // Only re-bind if the stream actually has a video track
+                if (stream.getVideoTracks().length > 0) {
+                  video.srcObject = null;
+                  video.srcObject = stream;
+                  video.play().catch(e => console.error('[Home] Video play error:', e));
+                } else {
+                  console.warn('[Home] Connected, but no video track found in the remote stream!');
+                }
+              }
+            }, 100);
           } else if (state === 'failed') {
             console.error('[Home] ICE Connection failed. TURN server likely rejecting credentials.');
             // Hang up automatically if it fails to connect
