@@ -267,8 +267,17 @@ export class SignalingService {
       console.log('[Signaling] Reusing existing camera stream');
       return this.localStream;
     }
-    console.log('[Signaling] Opening new camera stream');
-    this.localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: { facingMode: 'user' } });
+    console.log('[Signaling] Opening new camera stream with optimized constraints');
+    this.localStream = await navigator.mediaDevices.getUserMedia({ 
+      audio: true, 
+      video: { 
+        facingMode: 'user',
+        // Optimizing base resolution to prevent severe pixelation on strict mobile networks
+        width: { ideal: 640 },
+        height: { ideal: 480 },
+        frameRate: { ideal: 24 }
+      } 
+    });
     return this.localStream;
   }
 
