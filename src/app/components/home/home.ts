@@ -87,6 +87,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   private subscriptions: Subscription[] = [];
   private tipInterval: any = null;
   private matchRetryTimeout: any = null;
+  private iceConnectionTimeout: any = null;
   private isSearching = false;
   private coinCost = 10;
   private searchNonce = 0;
@@ -190,9 +191,18 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
             console.log('[Home] Remote stream received, waiting for ICE to connect...');
             this.state = 'connected'; 
             this.remoteMetadata = this.signalingService.remoteMetadata;
+            
+            // Start a 12-second timeout to prevent the endless "Connecting..." spinner
+            if (this.iceConnectionTimeout) clearTimeout(this.iceConnectionTimeout);
+            this.iceConnectionTimeout = setTimeout(() => {
+              if (this.state === 'connected' && !this.isConnected) {
+                console.warn('[Home] ICE Connection timeout! Forcing skip...');
+                this.handleNext();
+              }
+            }, 12000);
+
             if (this.remoteVideo?.nativeElement) {
               this.remoteVideo.nativeElement.srcObject = stream;
-              this.remoteVideo.nativeElement.play().catch(() => {});
             }
             this.cdr.detectChanges();
           } else {
@@ -212,13 +222,11 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
         this.ngZone.run(() => {
           if (state === 'connected' || state === 'completed') {
             console.log('[Home] ICE Connection fully established!');
+            if (this.iceConnectionTimeout) clearTimeout(this.iceConnectionTimeout);
             this.isConnected = true;
             this.cdr.detectChanges();
             
             // 🐛 FIX: Force the browser to render the video. 
-            // WebRTC often delivers the audio track first and the video track a few milliseconds later.
-            // If the video track arrives after srcObject is set, the browser might show a black screen.
-            // Re-assigning the stream forces the browser's media pipeline to refresh and decode the video.
             setTimeout(() => {
               if (this.remoteVideo?.nativeElement && this.signalingService.remoteStream) {
                 const video = this.remoteVideo.nativeElement;
@@ -228,14 +236,23 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
                 if (stream.getVideoTracks().length > 0) {
                   video.srcObject = null;
                   video.srcObject = stream;
-                  video.play().catch(e => console.error('[Home] Video play error:', e));
+                  
+                  // Safari/Mobile fix: play muted first, then unmute
+                  video.muted = true;
+                  video.play().then(() => {
+                    video.muted = false; // Unmute immediately after successful play
+                  }).catch(e => {
+                    console.error('[Home] Video play error (Autoplay blocked):', e);
+                    video.muted = false;
+                  });
                 } else {
                   console.warn('[Home] Connected, but no video track found in the remote stream!');
                 }
               }
-            }, 100);
+            }, 150);
           } else if (state === 'failed') {
             console.error('[Home] ICE Connection failed. TURN server likely rejecting credentials.');
+            if (this.iceConnectionTimeout) clearTimeout(this.iceConnectionTimeout);
             // Hang up automatically if it fails to connect
             if (this.state === 'connected') {
               this.handleNext();
@@ -624,6 +641,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.tipInterval) { clearInterval(this.tipInterval); this.tipInterval = null; }
     if (this.dotsTimer) { clearInterval(this.dotsTimer); this.dotsTimer = null; }
     if (this.matchRetryTimeout) { clearTimeout(this.matchRetryTimeout); this.matchRetryTimeout = null; }
+    if (this.iceConnectionTimeout) { clearTimeout(this.iceConnectionTimeout); this.iceConnectionTimeout = null; }
   }
 
   // ─── FILTERS ───
