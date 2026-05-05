@@ -292,9 +292,17 @@ export class SignalingService {
         ],
         username: 'g0e86ec05b94407fb8406184609716f2a5196dee9125367456a0f73dc5516aa8',
         credential: 'c4d78514269bce94108fbc7cc080eea6b060fcc92aabc18cc97e74e226829f4b'
+      },
+      {
+        urls: [
+          'turn:openrelay.metered.ca:80',
+          'turn:openrelay.metered.ca:443',
+          'turn:openrelay.metered.ca:443?transport=tcp'
+        ],
+        username: 'openrelayproject',
+        credential: 'openrelayproject'
       }
-    ],
-    iceCandidatePoolSize: 10
+    ]
   };
 
   private async fetchIceServers() {
