@@ -137,6 +137,7 @@ export class SignalingService {
     await this.fetchIceServers();
 
     try {
+      console.log('[Signaling] Creating PeerConnection with config:', JSON.stringify(this.iceConfiguration));
       this.peerConnection = new RTCPeerConnection(this.iceConfiguration);
       this.setupPeerConnectionListeners();
 
@@ -178,6 +179,7 @@ export class SignalingService {
             this.roomId = roomId; // CRITICAL: Save the room ID
             this.remoteMetadata = data.metadata;
             await this.fetchIceServers();
+            console.log('[Signaling] Joiner creating PeerConnection with config:', JSON.stringify(this.iceConfiguration));
             this.peerConnection = new RTCPeerConnection(this.iceConfiguration);
             this.setupPeerConnectionListeners();
 
@@ -269,22 +271,43 @@ export class SignalingService {
     };
   }
 
+  // Hardcoded fallback — ensures TURN is ALWAYS available even if the server fetch fails
+  private static FALLBACK_ICE_CONFIG: RTCConfiguration = {
+    iceServers: [
+      { urls: ['stun:stun.cloudflare.com:3478', 'stun:stun.l.google.com:19302'] },
+      {
+        urls: [
+          'turn:turn.cloudflare.com:3478?transport=udp',
+          'turn:turn.cloudflare.com:3478?transport=tcp',
+          'turns:turn.cloudflare.com:443?transport=tcp'
+        ],
+        username: 'g0e86ec05b94407fb8406184609716f2a5196dee9125367456a0f73dc5516aa8',
+        credential: 'c4d78514269bce94108fbc7cc080eea6b060fcc92aabc18cc97e74e226829f4b'
+      }
+    ],
+    iceCandidatePoolSize: 10
+  };
+
   private async fetchIceServers() {
     // Always fetch fresh credentials - TURN tokens expire!
-    return new Promise((resolve) => {
+    return new Promise<void>((resolve) => {
+      const timeout = setTimeout(() => {
+        console.warn('[Signaling] fetchIceServers TIMED OUT after 3s, using fallback');
+        this.iceConfiguration = SignalingService.FALLBACK_ICE_CONFIG;
+        resolve();
+      }, 3000);
+
       this.socket.emit('get_ice_servers', {}, (data: any) => {
+        clearTimeout(timeout);
         console.log('[Signaling] ICE servers received:', JSON.stringify(data));
-        if (data && data.iceServers) {
+        if (data && data.iceServers && data.iceServers.length > 0) {
           this.iceConfiguration = data;
+          console.log(`[Signaling] Using ${data.iceServers.length} ICE servers from backend`);
         } else {
-          console.warn('[Signaling] Invalid ICE config received, using fallback');
-          this.iceConfiguration = {
-            iceServers: [
-              { urls: ['stun:stun.l.google.com:19302'] }
-            ]
-          };
+          console.warn('[Signaling] Invalid ICE config from server, using fallback');
+          this.iceConfiguration = SignalingService.FALLBACK_ICE_CONFIG;
         }
-        resolve(true);
+        resolve();
       });
     });
   }
