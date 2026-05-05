@@ -36,6 +36,7 @@ export class SignalingService {
   private isRemoteDescriptionSet = false;
   private isPeerJoined = false;
   private isBusy = false;
+  private candidateQueue: RTCIceCandidateInit[] = [];
 
   public get isNegotiating(): boolean {
     return this.isPeerJoined || this.isRemoteDescriptionSet;
@@ -253,25 +254,6 @@ export class SignalingService {
   public sendMessage(text: string) {
     if (this.roomId) {
       this.socket.emit('send_message', { room_id: this.roomId, text });
-    }
-  }
-}
- }
-  }
-}
- }
-
-  public async stopWaiting() {
-    await this.hangUp();
-  }
-
-  public sendMessage(text: string) {
-    if (this.roomId) {
-      this.socket.emit('send_message', { room_id: this.roomId, text });
-    }
-  }
-}
-('send_message', { room_id: this.roomId, text });
     }
   }
 }
