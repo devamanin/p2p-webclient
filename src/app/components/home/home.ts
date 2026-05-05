@@ -187,9 +187,8 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
       this.signalingService.remoteStream$.subscribe(stream => {
         this.ngZone.run(() => {
           if (stream) {
-            console.log('[Home] Remote stream received');
-            this.isConnected = true;
-            this.state = 'connected'; // Ensure state is connected if we have video
+            console.log('[Home] Remote stream received, waiting for ICE to connect...');
+            this.state = 'connected'; 
             this.remoteMetadata = this.signalingService.remoteMetadata;
             if (this.remoteVideo?.nativeElement) {
               this.remoteVideo.nativeElement.srcObject = stream;
@@ -202,6 +201,25 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
               this.remoteVideo.nativeElement.srcObject = null;
             }
             this.cdr.detectChanges();
+          }
+        });
+      })
+    );
+
+    // Track ACTUAL ICE Connection State
+    this.subscriptions.push(
+      this.signalingService.connectionState$.subscribe(state => {
+        this.ngZone.run(() => {
+          if (state === 'connected' || state === 'completed') {
+            console.log('[Home] ICE Connection fully established!');
+            this.isConnected = true;
+            this.cdr.detectChanges();
+          } else if (state === 'failed') {
+            console.error('[Home] ICE Connection failed. TURN server likely rejecting credentials.');
+            // Hang up automatically if it fails to connect
+            if (this.state === 'connected') {
+              this.handleNext();
+            }
           }
         });
       })

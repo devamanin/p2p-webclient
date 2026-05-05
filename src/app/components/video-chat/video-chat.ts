@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, ElementRef, OnInit, AfterViewInit, ViewChild, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { SignalingService } from '../../services/signaling.service';
@@ -11,7 +11,7 @@ import { Subscription } from 'rxjs';
   templateUrl: './video-chat.html',
   styleUrl: './video-chat.css'
 })
-export class VideoChatComponent implements OnInit, OnDestroy {
+export class VideoChatComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('localVideo') localVideo!: ElementRef<HTMLVideoElement>;
   @ViewChild('remoteVideo') remoteVideo!: ElementRef<HTMLVideoElement>;
 
@@ -28,27 +28,40 @@ export class VideoChatComponent implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef
   ) {}
 
-  async ngOnInit() {
+  ngOnInit() {
     this.remoteMetadata = this.signalingService.remoteMetadata;
-
-    try {
-      const stream = await this.signalingService.openUserMedia();
-      if (this.localVideo) this.localVideo.nativeElement.srcObject = stream;
-    } catch (e) { console.error(e); }
-
-    this.subscriptions.push(
-      this.signalingService.remoteStream$.subscribe(stream => {
-        if (stream && this.remoteVideo) {
-          this.remoteVideo.nativeElement.srcObject = stream;
-          this.isConnected = true;
-          this.cdr.detectChanges();
-        }
-      })
-    );
 
     this.subscriptions.push(
       this.signalingService.sessionEnded$.subscribe(() => {
         if (!this.isTransitioning) this.handleNext();
+      })
+    );
+  }
+
+  async ngAfterViewInit() {
+    try {
+      const stream = await this.signalingService.openUserMedia();
+      if (this.localVideo) {
+        this.localVideo.nativeElement.srcObject = stream;
+        this.localVideo.nativeElement.play().catch(e => console.error('[VideoChat] Local play error:', e));
+      }
+    } catch (e) { console.error(e); }
+
+    this.subscriptions.push(
+      this.signalingService.remoteStream$.subscribe(stream => {
+        console.log('[VideoChat] Remote stream updated:', !!stream);
+        if (stream && this.remoteVideo) {
+          this.remoteVideo.nativeElement.srcObject = stream;
+          this.remoteVideo.nativeElement.play().catch(e => {
+            console.warn('[VideoChat] Remote video play failed (possibly autoplay policy):', e);
+          });
+          this.isConnected = true;
+          this.cdr.detectChanges();
+        } else if (!stream) {
+          this.isConnected = false;
+          if (this.remoteVideo) this.remoteVideo.nativeElement.srcObject = null;
+          this.cdr.detectChanges();
+        }
       })
     );
   }

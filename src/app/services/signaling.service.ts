@@ -24,6 +24,9 @@ export class SignalingService {
   private peerJoinedSubject = new Subject<void>();
   public peerJoined$ = this.peerJoinedSubject.asObservable();
 
+  private connectionStateSubject = new BehaviorSubject<string>('new');
+  public connectionState$ = this.connectionStateSubject.asObservable();
+
   private sessionEndedSubject = new Subject<void>();
   public sessionEnded$ = this.sessionEndedSubject.asObservable();
 
@@ -68,10 +71,14 @@ export class SignalingService {
     });
 
     this.socket.on('candidate', async (data: any) => {
-      if (this.peerConnection) {
+      if (this.peerConnection && this.isRemoteDescriptionSet) {
         try {
           await this.peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
         } catch (e) { /* Ignore candidate errors during transitions */ }
+      } else {
+        // Queue candidates if PeerConnection isn't ready or RemoteDescription isn't set
+        // This handles candidates arriving before the join handshake completes
+        this.candidateQueue.push(data.candidate);
       }
     });
 
@@ -114,6 +121,7 @@ export class SignalingService {
     if (this.isBusy) return null;
     this.isBusy = true;
     this.isRemoteDescriptionSet = false;
+    this.candidateQueue = [];
 
     await this.fetchIceServers();
 
@@ -150,6 +158,7 @@ export class SignalingService {
     if (this.isBusy) return false;
     this.isBusy = true;
     this.isRemoteDescriptionSet = false;
+    this.candidateQueue = [];
 
     return new Promise((resolve) => {
       this.socket.emit('join_room', { room_id: roomId, metadata }, async (data: any) => {
@@ -163,6 +172,7 @@ export class SignalingService {
 
             await this.peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
             this.isRemoteDescriptionSet = true;
+            await this.flushIceCandidates();
 
             this.localStream?.getTracks().forEach(t => this.peerConnection?.addTrack(t, this.localStream!));
             const answer = await this.peerConnection.createAnswer();
@@ -191,10 +201,25 @@ export class SignalingService {
         this.socket.emit('send_candidate', { room_id: this.roomId, candidate: event.candidate.toJSON() });
       }
     };
+    this.peerConnection.onconnectionstatechange = () => {
+      const state = this.peerConnection?.connectionState || 'new';
+      console.log('[Signaling] Connection state:', state);
+      this.connectionStateSubject.next(state);
+      if (state === 'failed') {
+        console.warn('[Signaling] PeerConnection FAILED - possible ICE/STUN issue');
+      }
+    };
     this.peerConnection.ontrack = (event) => {
-      if (event.streams[0]) {
+      console.log('[Signaling] ontrack received:', event.track.kind);
+      if (event.streams && event.streams[0]) {
         this.remoteStream = event.streams[0];
         this.remoteStreamSubject.next(this.remoteStream);
+      } else {
+        if (!this.remoteStream) {
+          this.remoteStream = new MediaStream();
+          this.remoteStreamSubject.next(this.remoteStream);
+        }
+        this.remoteStream.addTrack(event.track);
       }
     };
   }
@@ -209,7 +234,15 @@ export class SignalingService {
     });
   }
 
-  private flushIceCandidates() { /* Simplified candidate handling */ }
+  private async flushIceCandidates() {
+    console.log(`[Signaling] Flushing ${this.candidateQueue.length} queued candidates`);
+    while (this.candidateQueue.length > 0) {
+      const candidate = this.candidateQueue.shift();
+      try {
+        await this.peerConnection?.addIceCandidate(new RTCIceCandidate(candidate));
+      } catch (e) { console.error('[Signaling] Flush Candidate Error:', e); }
+    }
+  }
 
   public async openUserMedia() {
     // REUSE logic to prevent "Device Busy" errors
@@ -233,6 +266,7 @@ export class SignalingService {
     this.isMatched = false;
     this.isBusy = false;
     this.candidateQueue = [];
+    this.connectionStateSubject.next('closed');
 
     // Stop remote video
     this.remoteStream?.getTracks().forEach(t => t.stop());
