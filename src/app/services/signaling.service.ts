@@ -46,6 +46,8 @@ export class SignalingService {
     return this.isPeerJoined || this.isRemoteDescriptionSet;
   }
   private iceConfiguration: RTCConfiguration = {};
+  private hasAttemptedIceRestart = false;
+  private connectionAttemptCount = 0;
 
   constructor() {
     console.log('[Signaling] Initializing Socket...');
@@ -249,6 +251,7 @@ export class SignalingService {
       this.connectionStateSubject.next(state);
       if (state === 'failed') {
         console.warn('[Signaling] PeerConnection FAILED - possible ICE/STUN issue');
+        this.attemptIceRestart();
       }
     };
     this.peerConnection.oniceconnectionstatechange = () => {
@@ -259,7 +262,11 @@ export class SignalingService {
       if (iceState === 'connected' || iceState === 'completed') {
         this.connectionStateSubject.next('connected');
       } else if (iceState === 'failed') {
+        console.warn('[Signaling] ICE connection FAILED');
         this.connectionStateSubject.next('failed');
+        this.attemptIceRestart();
+      } else if (iceState === 'disconnected') {
+        console.warn('[Signaling] ICE connection DISCONNECTED — may recover or need restart');
       }
     };
     this.peerConnection.onicegatheringstatechange = () => {
@@ -280,28 +287,12 @@ export class SignalingService {
     };
   }
 
-  // Hardcoded fallback — ensures TURN is ALWAYS available even if the server fetch fails
+  // Fallback ICE config — STUN only. TURN credentials MUST come from the server.
+  // Static Cloudflare TURN creds DO NOT WORK (Cloudflare requires dynamic API tokens).
+  // The deprecated openrelay.metered.ca is also removed.
   private static FALLBACK_ICE_CONFIG: RTCConfiguration = {
     iceServers: [
-      { urls: ['stun:stun.cloudflare.com:3478', 'stun:stun.l.google.com:19302'] },
-      {
-        urls: [
-          'turn:turn.cloudflare.com:3478?transport=udp',
-          'turn:turn.cloudflare.com:3478?transport=tcp',
-          'turns:turn.cloudflare.com:443?transport=tcp'
-        ],
-        username: 'g0e86ec05b94407fb8406184609716f2a5196dee9125367456a0f73dc5516aa8',
-        credential: 'c4d78514269bce94108fbc7cc080eea6b060fcc92aabc18cc97e74e226829f4b'
-      },
-      {
-        urls: [
-          'turn:openrelay.metered.ca:80',
-          'turn:openrelay.metered.ca:443',
-          'turn:openrelay.metered.ca:443?transport=tcp'
-        ],
-        username: 'openrelayproject',
-        credential: 'openrelayproject'
-      }
+      { urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302', 'stun:stun.cloudflare.com:3478'] }
     ]
   };
 
@@ -309,19 +300,24 @@ export class SignalingService {
     // Always fetch fresh credentials - TURN tokens expire!
     return new Promise<void>((resolve) => {
       const timeout = setTimeout(() => {
-        console.warn('[Signaling] fetchIceServers TIMED OUT after 3s, using fallback');
+        console.warn('[Signaling] fetchIceServers TIMED OUT after 5s, using fallback (STUN only!)');
         this.iceConfiguration = SignalingService.FALLBACK_ICE_CONFIG;
         resolve();
-      }, 3000);
+      }, 5000);
 
       this.socket.emit('get_ice_servers', {}, (data: any) => {
         clearTimeout(timeout);
-        console.log('[Signaling] ICE servers received:', JSON.stringify(data));
         if (data && data.iceServers && data.iceServers.length > 0) {
+          const hasTurn = data.iceServers.some((s: any) =>
+            (s.urls || []).some((u: string) => u.startsWith('turn'))
+          );
+          console.log(`[Signaling] ICE servers received: ${data.iceServers.length} entries, hasTURN=${hasTurn}`);
+          if (!hasTurn) {
+            console.warn('[Signaling] ⚠ No TURN servers from backend — connections on restrictive networks (Jio etc.) will FAIL');
+          }
           this.iceConfiguration = data;
-          console.log(`[Signaling] Using ${data.iceServers.length} ICE servers from backend`);
         } else {
-          console.warn('[Signaling] Invalid ICE config from server, using fallback');
+          console.warn('[Signaling] Invalid ICE config from server, using fallback (STUN only!)');
           this.iceConfiguration = SignalingService.FALLBACK_ICE_CONFIG;
         }
         resolve();
@@ -359,6 +355,48 @@ export class SignalingService {
     return this.localStream;
   }
 
+  /**
+   * Attempt ICE restart when the connection fails.
+   * On first failure: tries ICE restart with existing config.
+   * On second failure: forces relay-only transport policy (critical for Jio/CGNAT networks).
+   */
+  private async attemptIceRestart() {
+    if (!this.peerConnection || !this.roomId) return;
+    
+    if (this.hasAttemptedIceRestart) {
+      console.warn('[Signaling] ICE restart already attempted, not retrying again');
+      return;
+    }
+    
+    this.hasAttemptedIceRestart = true;
+    this.connectionAttemptCount++;
+    
+    try {
+      if (this.connectionAttemptCount >= 2) {
+        // On repeated failures, force relay-only mode
+        // This is the nuclear option for restrictive networks like Jio
+        console.log('[Signaling] 🔄 Forcing relay-only ICE transport policy...');
+        const relayConfig: RTCConfiguration = {
+          ...this.iceConfiguration,
+          iceTransportPolicy: 'relay'
+        };
+        this.peerConnection.setConfiguration(relayConfig);
+      }
+      
+      console.log('[Signaling] 🔄 Attempting ICE restart...');
+      const offer = await this.peerConnection.createOffer({ iceRestart: true });
+      await this.peerConnection.setLocalDescription(offer);
+      
+      // Send the new offer to the peer via the signaling server
+      if (this.roomId) {
+        this.socket.emit('send_answer', { room_id: this.roomId, answer: offer });
+        console.log('[Signaling] ICE restart offer sent');
+      }
+    } catch (e) {
+      console.error('[Signaling] ICE restart failed:', e);
+    }
+  }
+
   public async hangUp() {
     console.log('[Signaling] Hanging up and cleaning up PeerConnection...');
     if (this.roomId) this.socket.emit('leave_room', { room_id: this.roomId });
@@ -371,6 +409,8 @@ export class SignalingService {
     this.isBusy = false;
     this.candidateQueue = [];
     this.earlyLocalCandidates = [];
+    this.hasAttemptedIceRestart = false;
+    this.connectionAttemptCount = 0;
     this.connectionStateSubject.next('closed');
 
     // Stop remote video
