@@ -52,16 +52,39 @@ export class SignalingService {
   constructor() {
     console.log('[Signaling] Initializing Socket...');
     this.socket = io(this.serverUrl, {
-      transports: ['websocket', 'polling'],
+      // CRITICAL: Start with 'polling' first. Jio and other CGNAT mobile networks
+      // actively block/reset raw WebSocket connections. HTTP long-polling works
+      // universally and Socket.IO will auto-upgrade to WebSocket once connected.
+      transports: ['polling', 'websocket'],
+      upgrade: true,
       autoConnect: true,
       reconnection: true,
+      reconnectionAttempts: Infinity,  // Never stop trying on mobile networks
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 10000,     // Cap at 10s between retries
+      timeout: 20000,                  // 20s connection timeout for slow networks
+      forceNew: false,
     });
 
     this.setupSocketListeners();
   }
 
   private setupSocketListeners() {
-    this.socket.on('connect', () => console.log('[Signaling] Connected. ID:', this.socket.id));
+    this.socket.on('connect', () => {
+      console.log('[Signaling] ✓ Connected. ID:', this.socket.id, 'Transport:', this.socket.io.engine?.transport?.name);
+    });
+    this.socket.on('connect_error', (err: any) => {
+      console.error('[Signaling] ✗ Connection error:', err.message, '| Type:', err.type, '| Transport:', this.socket.io.engine?.transport?.name || 'none');
+    });
+    this.socket.on('disconnect', (reason: string) => {
+      console.warn('[Signaling] Disconnected. Reason:', reason);
+    });
+    this.socket.io.on('reconnect_attempt', (attempt: number) => {
+      console.log(`[Signaling] Reconnect attempt #${attempt}...`);
+    });
+    this.socket.io.on('reconnect', (attempt: number) => {
+      console.log(`[Signaling] ✓ Reconnected after ${attempt} attempts`);
+    });
 
     this.socket.on('answer', async (data: any) => {
       if (this.peerConnection && !this.isRemoteDescriptionSet) {
