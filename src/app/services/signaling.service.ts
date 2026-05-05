@@ -7,7 +7,7 @@ import { BehaviorSubject, Observable, Subject } from 'rxjs';
 })
 export class SignalingService {
   private socket!: Socket;
-  private serverUrl = 'https://web-production-17aa6.up.railway.app/';
+  private serverUrl = 'https://api.blynq.app/';
   // private serverUrl = 'https://p2pcall-signalling-service.onrender.com/';
 
   public peerConnection: RTCPeerConnection | null = null;
