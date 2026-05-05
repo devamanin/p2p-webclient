@@ -1,0 +1,167 @@
+<div class="min-h-screen bg-[#0E0E11] text-white flex flex-col font-jakarta relative overflow-x-hidden">
+  
+  <!-- Navbar -->
+  <nav class="flex items-center justify-between px-6 py-4 md:px-12 md:py-6 bg-black/20 backdrop-blur-md fixed top-0 w-full z-50 border-b border-white/5">
+    <div class="flex items-center space-x-2 cursor-pointer" routerLink="/">
+      <img src="assets/logo.svg" alt="blynq.app logo" class="w-8 h-8 drop-shadow-[0_0_12px_rgba(105,218,255,0.8)]">
+      <span class="font-space font-bold text-xl tracking-[2px] text-white drop-shadow-[0_0_12px_rgba(105,218,255,0.8)]">blynq.app</span>
+    </div>
+    <div class="flex items-center space-x-6">
+      <a routerLink="/careers" class="text-sm font-medium text-white/60 hover:text-white transition-colors hidden md:block">Careers</a>
+      <a routerLink="/" class="bg-white/5 hover:bg-white/10 border border-white/10 text-white px-5 py-2 rounded-full font-bold text-sm transition-colors">
+        Back
+      </a>
+    </div>
+  </nav>
+
+  <main class="flex-1 pt-32 pb-20 px-6 md:px-12 relative z-10">
+    <!-- Animated background blobs -->
+    <div class="absolute top-0 right-1/4 w-96 h-96 bg-[#69DAFF]/5 rounded-full blur-[120px] pointer-events-none"></div>
+    <div class="absolute bottom-0 left-1/4 w-96 h-96 bg-[#D674FF]/5 rounded-full blur-[120px] pointer-events-none"></div>
+
+    <div class="max-w-6xl mx-auto">
+      <header class="mb-16 text-center">
+        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#D674FF]/10 border border-[#D674FF]/20 mb-6 text-[#D674FF] text-xs font-bold tracking-widest uppercase">
+          <span class="material-icons text-sm">auto_stories</span>
+          <span>Authentic Human Moments</span>
+        </div>
+        <h1 class="text-5xl md:text-7xl font-space font-black tracking-tight mb-6 leading-tight">
+          Stories & <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#69DAFF] to-[#D674FF]">Voices</span>
+        </h1>
+        <p class="text-lg md:text-xl text-white/50 max-w-2xl mx-auto font-medium">
+          A collection of real-life experiences, from the stage to the campus, shared by our community.
+        </p>
+
+        <!-- Hiring Callout -->
+        <div class="mt-12 inline-flex items-center space-x-4 bg-white/5 border border-white/10 p-2 pl-6 rounded-full hover:border-[#69DAFF]/30 transition-all cursor-pointer group" routerLink="/careers">
+          <span class="text-xs font-bold text-white/60 tracking-wider">WE'RE HIRING <span class="text-[#69DAFF]">CONTENT CREATORS</span></span>
+          <div class="w-8 h-8 rounded-full bg-[#69DAFF] flex items-center justify-center text-black group-hover:scale-110 transition-transform">
+            <span class="material-icons text-sm">arrow_forward</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Format Filter -->
+      <div class="flex justify-center mb-6">
+        <div class="inline-flex p-1 bg-white/5 border border-white/10 rounded-2xl">
+          <button 
+            *ngFor="let type of storyTypes"
+            (click)="selectType(type.id)"
+            [class.bg-[#69DAFF]]="selectedType === type.id"
+            [class.text-black]="selectedType === type.id"
+            [class.text-white/60]="selectedType !== type.id"
+            class="px-6 py-3 rounded-xl text-xs font-black uppercase tracking-[1px] transition-all duration-300 flex items-center space-x-2">
+            <span class="material-icons text-sm">{{ type.icon }}</span>
+            <span>{{ type.label }}</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Category Filter -->
+      <div class="flex flex-wrap justify-center gap-2 mb-16">
+        <button 
+          *ngFor="let cat of categories"
+          (click)="selectCategory(cat)"
+          [class.text-[#69DAFF]]="selectedCategory === cat"
+          [class.border-[#69DAFF]/30]="selectedCategory === cat"
+          [class.bg-[#69DAFF]/10]="selectedCategory === cat"
+          [class.text-white/40]="selectedCategory !== cat"
+          [class.border-white/5]="selectedCategory !== cat"
+          class="px-5 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all duration-300 border">
+          {{ cat }}
+        </button>
+      </div>
+
+      <!-- Stories Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
+        <div *ngFor="let story of filteredStories" class="group relative bg-[#16161D] border border-white/5 rounded-[2.5rem] overflow-hidden hover:border-white/20 transition-all duration-500 hover:-translate-y-2">
+          
+          <div class="aspect-[16/10] overflow-hidden">
+            <img [src]="story.image" [alt]="story.title" class="w-full h-full object-cover grayscale opacity-40 group-hover:grayscale-0 group-hover:opacity-80 transition-all duration-700 group-hover:scale-105">
+          </div>
+
+          <div class="p-8 md:p-10 flex flex-col h-full">
+            <div class="flex items-center justify-between mb-6">
+              <div class="flex items-center space-x-2">
+                <span class="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] font-bold uppercase tracking-widest text-[#69DAFF]">
+                  {{ story.category }}
+                </span>
+                <span *ngIf="story.type === 'audio'" class="px-3 py-1 bg-[#69DAFF]/10 border border-[#69DAFF]/20 rounded-full text-[10px] font-bold uppercase tracking-widest text-[#69DAFF] flex items-center">
+                  <span class="material-icons text-xs mr-1">mic</span> Voice Story
+                </span>
+              </div>
+              <span class="text-xs text-white/30 font-medium">{{ story.date }}</span>
+            </div>
+
+            <h2 class="text-2xl md:text-3xl font-space font-bold mb-6 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-[#69DAFF] group-hover:to-[#D674FF] transition-all duration-300">
+              {{ story.title }}
+            </h2>
+
+            <p class="text-white/50 text-lg leading-relaxed mb-8 line-clamp-4">
+              "{{ story.content }}"
+            </p>
+
+            <!-- Audio Player UI -->
+            <div *ngIf="story.type === 'audio'" class="mb-8 p-4 bg-white/5 border border-white/10 rounded-2xl flex items-center space-x-4 group/player cursor-pointer hover:bg-white/10 transition-colors">
+              <div class="w-10 h-10 rounded-full bg-[#69DAFF] flex items-center justify-center text-black shadow-[0_0_15px_rgba(105,218,255,0.4)]">
+                <span class="material-icons">play_arrow</span>
+              </div>
+              <div class="flex-1">
+                <div class="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+                  <div class="h-full bg-gradient-to-r from-[#69DAFF] to-[#D674FF] w-1/3"></div>
+                </div>
+                <div class="flex justify-between mt-2">
+                  <span class="text-[10px] text-white/40 font-bold uppercase tracking-wider">Listen to story</span>
+                  <span class="text-[10px] text-white/40">2:45</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-auto flex items-center space-x-4 border-t border-white/5 pt-8">
+              <img [src]="story.avatar" [alt]="story.author" class="w-10 h-10 rounded-full border border-white/10">
+              <div>
+                <p class="text-sm font-bold text-white">{{ story.author }}</p>
+                <p class="text-xs text-white/40">Storyteller</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Decorative gradient overlay on hover -->
+          <div class="absolute inset-0 bg-gradient-to-t from-[#69DAFF]/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
+        </div>
+      </div>
+
+      <!-- Call to Action -->
+      <div class="mt-24 text-center bg-gradient-to-br from-[#16161D] to-transparent p-12 md:p-20 rounded-[3rem] border border-white/5 relative overflow-hidden">
+        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-5"></div>
+        
+        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#4ADE80]/10 border border-[#4ADE80]/20 mb-6 text-[#4ADE80] text-[10px] font-bold tracking-widest uppercase relative z-10">
+          <span class="material-icons text-sm">payments</span>
+          <span>Paid Opportunity</span>
+        </div>
+
+        <h3 class="text-3xl md:text-5xl font-space font-bold mb-6 relative z-10">Your story is <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#69DAFF] to-[#D674FF]">valuable.</span></h3>
+        <p class="text-white/50 text-lg mb-10 max-w-2xl mx-auto relative z-10">
+          Share your authentic experiences with the Blynq community via <strong>text or audio</strong> and <strong>get rewarded for your writing.</strong> We believe great storytelling deserves recognition.
+        </p>
+        <button class="bg-gradient-to-r from-[#69DAFF] to-[#D674FF] text-white px-10 py-5 rounded-full font-black text-lg hover:scale-105 transition-transform shadow-[0_0_40px_rgba(105,218,255,0.2)] relative z-10">
+          Upload Text or Audio & Get Paid
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <footer class="border-t border-white/5 py-12 px-6 bg-[#0E0E11] text-center">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+      <div class="flex items-center space-x-2">
+        <img src="assets/logo.svg" alt="logo" class="w-6 h-6 grayscale opacity-50">
+        <span class="font-space font-bold text-white/50">© 2026 blynq.app</span>
+      </div>
+      <div class="flex space-x-6 text-sm font-medium text-white/40">
+        <a routerLink="/careers" class="hover:text-white transition-colors">Careers</a>
+        <a routerLink="/privacy-policy" class="hover:text-white transition-colors">Privacy Policy</a>
+        <a routerLink="/safety-standards" class="hover:text-white transition-colors">Safety</a>
+      </div>
+    </div>
+  </footer>
+</div>

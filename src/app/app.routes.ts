@@ -6,6 +6,7 @@ import { PrivacyPolicyComponent } from './components/privacy-policy/privacy-poli
 import { SafetyStandardsComponent } from './components/safety-standards/safety-standards';
 import { LandingComponent } from './components/landing/landing';
 import { CareersComponent } from './components/careers/careers';
+import { StoriesComponent } from './components/stories/stories';
 
 import { AuthGuard } from './guards/auth.guard';
 
@@ -14,6 +15,7 @@ export const routes: Routes = [
   { path: 'login', component: SplashComponent },
   { path: 'landing', redirectTo: '' },
   { path: 'careers', component: CareersComponent },
+  { path: 'stories', component: StoriesComponent },
   { path: 'home', component: HomeComponent, canActivate: [AuthGuard] },
   { path: 'delete-account', component: DeleteAccountComponent },
   { path: 'privacy-policy', component: PrivacyPolicyComponent },

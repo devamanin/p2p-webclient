@@ -1,0 +1,53 @@
+:host {
+  display: block;
+}
+
+.font-jakarta {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.font-space {
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.line-clamp-4 {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Smooth reveal animation for cards */
+.grid > div {
+  animation: reveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Staggered delay */
+.grid > div:nth-child(1) { animation-delay: 0.1s; }
+.grid > div:nth-child(2) { animation-delay: 0.2s; }
+.grid > div:nth-child(3) { animation-delay: 0.3s; }
+.grid > div:nth-child(4) { animation-delay: 0.4s; }
+
+/* Audio Player Animations */
+.group\/player:hover .material-icons {
+  transform: scale(1.1);
+}
+
+.group\/player .h-full {
+  transition: width 0.3s ease-out;
+}
+
+.group\/player:hover .h-full {
+  width: 60%;
+}
