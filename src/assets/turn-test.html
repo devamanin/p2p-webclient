@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>TURN Server Connectivity Test</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', sans-serif; background: #0a0a0a; color: #e0e0e0; padding: 30px; }
+    h1 { color: #fff; margin-bottom: 10px; }
+    .subtitle { color: #888; margin-bottom: 30px; }
+    .card { background: #1a1a1a; border: 1px solid #333; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+    .card h3 { color: #fff; margin-bottom: 12px; }
+    button { background: #6c5ce7; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 16px; cursor: pointer; margin: 5px; }
+    button:hover { background: #5a4bd1; }
+    button:disabled { background: #444; cursor: not-allowed; }
+    .log { background: #111; border: 1px solid #333; border-radius: 8px; padding: 15px; max-height: 400px; overflow-y: auto; font-family: monospace; font-size: 13px; line-height: 1.6; white-space: pre-wrap; }
+    .success { color: #00e676; }
+    .error { color: #ff5252; }
+    .warn { color: #ffd740; }
+    .info { color: #40c4ff; }
+    .result-box { display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 20px; }
+    .result-item { background: #222; border-radius: 8px; padding: 15px 20px; min-width: 150px; text-align: center; }
+    .result-item .label { color: #888; font-size: 12px; margin-bottom: 5px; }
+    .result-item .value { font-size: 24px; font-weight: bold; }
+    .result-item .value.green { color: #00e676; }
+    .result-item .value.red { color: #ff5252; }
+    .result-item .value.yellow { color: #ffd740; }
+    textarea { width: 100%; background: #111; color: #e0e0e0; border: 1px solid #333; border-radius: 8px; padding: 10px; font-family: monospace; font-size: 13px; resize: vertical; }
+  </style>
+</head>
+<body>
+  <h1>🔧 TURN Server Connectivity Test</h1>
+  <p class="subtitle">Tests whether your TURN/STUN servers are reachable from this network (Jio, Airtel, WiFi, etc.)</p>
+
+  <div class="card">
+    <h3>ICE Server Configuration</h3>
+    <p style="color:#888; margin-bottom:10px;">Paste your ICE server config from app.py below, or use the pre-filled one:</p>
+    <textarea id="iceConfig" rows="15">{
+  "iceServers": [
+    {
+      "urls": ["stun:stun.cloudflare.com:3478", "stun:stun.l.google.com:19302"]
+    },
+    {
+      "urls": [
+        "turn:turn.cloudflare.com:3478?transport=udp",
+        "turn:turn.cloudflare.com:3478?transport=tcp",
+        "turns:turn.cloudflare.com:443?transport=tcp"
+      ],
+      "username": "g0e86ec05b94407fb8406184609716f2a5196dee9125367456a0f73dc5516aa8",
+      "credential": "c4d78514269bce94108fbc7cc080eea6b060fcc92aabc18cc97e74e226829f4b"
+    },
+    {
+      "urls": [
+        "turn:openrelay.metered.ca:80",
+        "turn:openrelay.metered.ca:443",
+        "turn:openrelay.metered.ca:443?transport=tcp"
+      ],
+      "username": "openrelayproject",
+      "credential": "openrelayproject",
+      "credentialType": "password"
+    }
+  ]
+}</textarea>
+    <br><br>
+    <button onclick="runTest()">▶ Run TURN Test</button>
+    <button onclick="runRelayOnlyTest()">🔒 Test RELAY Only (Force TURN)</button>
+    <button onclick="clearLog()">🗑 Clear Log</button>
+  </div>
+
+  <div class="result-box" id="results" style="display:none;">
+    <div class="result-item">
+      <div class="label">Host Candidates</div>
+      <div class="value" id="hostCount">0</div>
+    </div>
+    <div class="result-item">
+      <div class="label">STUN (srflx)</div>
+      <div class="value" id="srflxCount">0</div>
+    </div>
+    <div class="result-item">
+      <div class="label">TURN Relay</div>
+      <div class="value" id="relayCount">0</div>
+    </div>
+    <div class="result-item">
+      <div class="label">Verdict</div>
+      <div class="value" id="verdict">...</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Test Log</h3>
+    <div class="log" id="log">Click "Run TURN Test" to begin...</div>
+  </div>
+
+<script>
+  const logEl = document.getElementById('log');
+  let pc = null;
+
+  function log(msg, cls = 'info') {
+    const time = new Date().toLocaleTimeString();
+    logEl.innerHTML += `<span class="${cls}">[${time}] ${msg}</span>\n`;
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  function clearLog() {
+    logEl.innerHTML = '';
+    document.getElementById('results').style.display = 'none';
+  }
+
+  async function runTest(relayOnly = false) {
+    clearLog();
+    if (pc) { pc.close(); pc = null; }
+
+    let config;
+    try {
+      config = JSON.parse(document.getElementById('iceConfig').value);
+    } catch (e) {
+      log('❌ Invalid JSON in config! ' + e.message, 'error');
+      return;
+    }
+
+    if (relayOnly) {
+      config.iceTransportPolicy = 'relay';
+      log('🔒 RELAY-ONLY MODE: Forcing all traffic through TURN server', 'warn');
+    }
+
+    log('📡 Creating RTCPeerConnection with config:', 'info');
+    log(JSON.stringify(config, null, 2), 'info');
+
+    try {
+      pc = new RTCPeerConnection(config);
+    } catch (e) {
+      log('❌ Failed to create PeerConnection: ' + e.message, 'error');
+      return;
+    }
+
+    const candidates = { host: [], srflx: [], relay: [] };
+    let gatheringDone = false;
+
+    pc.onicecandidate = (event) => {
+      if (event.candidate) {
+        const c = event.candidate;
+        const type = c.type || 'unknown';
+        const protocol = c.protocol || '?';
+        const addr = c.address || c.relatedAddress || '?';
+
+        if (type === 'host') {
+          candidates.host.push(c);
+          log(`🏠 HOST candidate: ${addr}:${c.port} (${protocol})`, 'info');
+        } else if (type === 'srflx') {
+          candidates.srflx.push(c);
+          log(`🌐 STUN candidate: ${addr}:${c.port} (${protocol}) via ${c.relatedAddress}:${c.relatedPort}`, 'success');
+        } else if (type === 'relay') {
+          candidates.relay.push(c);
+          log(`✅ TURN RELAY candidate: ${addr}:${c.port} (${protocol}) via ${c.relatedAddress}:${c.relatedPort}`, 'success');
+        } else {
+          log(`❓ Unknown candidate type "${type}": ${c.candidate}`, 'warn');
+        }
+      } else {
+        // Gathering complete
+        gatheringDone = true;
+        showResults(candidates, relayOnly);
+      }
+    };
+
+    pc.onicegatheringstatechange = () => {
+      log(`📋 ICE Gathering State: ${pc.iceGatheringState}`, 'info');
+    };
+
+    // Create a dummy data channel to trigger ICE gathering
+    pc.createDataChannel('test');
+
+    try {
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+      log('✅ Offer created, ICE gathering started...', 'success');
+    } catch (e) {
+      log('❌ Failed to create offer: ' + e.message, 'error');
+      return;
+    }
+
+    // Timeout after 15 seconds
+    setTimeout(() => {
+      if (!gatheringDone) {
+        log('⏰ Gathering timed out after 15 seconds', 'warn');
+        showResults(candidates, relayOnly);
+        pc.close();
+      }
+    }, 15000);
+  }
+
+  function runRelayOnlyTest() {
+    runTest(true);
+  }
+
+  function showResults(candidates, relayOnly) {
+    document.getElementById('results').style.display = 'flex';
+    document.getElementById('hostCount').textContent = candidates.host.length;
+    document.getElementById('srflxCount').textContent = candidates.srflx.length;
+
+    const relayCountEl = document.getElementById('relayCount');
+    relayCountEl.textContent = candidates.relay.length;
+    relayCountEl.className = candidates.relay.length > 0 ? 'value green' : 'value red';
+
+    const verdictEl = document.getElementById('verdict');
+
+    log('\n─── RESULTS ───', 'info');
+    log(`Host candidates:  ${candidates.host.length}`, 'info');
+    log(`STUN candidates:  ${candidates.srflx.length}`, candidates.srflx.length > 0 ? 'success' : 'warn');
+    log(`RELAY candidates: ${candidates.relay.length}`, candidates.relay.length > 0 ? 'success' : 'error');
+
+    if (candidates.relay.length > 0) {
+      verdictEl.textContent = '✅ PASS';
+      verdictEl.className = 'value green';
+      log('\n✅ TURN SERVER IS WORKING! Relay candidates were found.', 'success');
+      log('Video calls should work on restrictive networks (Jio, corporate WiFi, etc.)', 'success');
+    } else if (relayOnly) {
+      verdictEl.textContent = '❌ FAIL';
+      verdictEl.className = 'value red';
+      log('\n❌ TURN SERVER IS NOT WORKING! No relay candidates found.', 'error');
+      log('Possible reasons:', 'error');
+      log('  1. TURN credentials are EXPIRED (most likely)', 'error');
+      log('  2. TURN server is unreachable from this network', 'error');
+      log('  3. TURN server URL is incorrect', 'error');
+      log('\n👉 Generate fresh credentials from Cloudflare Dashboard and paste them above.', 'warn');
+    } else if (candidates.srflx.length > 0) {
+      verdictEl.textContent = '⚠️ PARTIAL';
+      verdictEl.className = 'value yellow';
+      log('\n⚠️ STUN works but TURN relay failed.', 'warn');
+      log('WiFi calls will work, but mobile network calls will FAIL.', 'warn');
+      log('Click "Test RELAY Only" to confirm TURN is broken.', 'warn');
+    } else {
+      verdictEl.textContent = '❌ FAIL';
+      verdictEl.className = 'value red';
+      log('\n❌ Both STUN and TURN failed. This network may block all WebRTC traffic.', 'error');
+    }
+  }
+</script>
+</body>
+</html>
