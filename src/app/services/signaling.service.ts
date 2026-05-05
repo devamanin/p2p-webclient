@@ -231,6 +231,7 @@ export class SignalingService {
     this.remoteMetadata = null;
     this.isMatched = false;
     this.isBusy = false;
+    this.candidateQueue = [];
 
     // Stop remote video
     this.remoteStream?.getTracks().forEach(t => t.stop());
@@ -252,6 +253,25 @@ export class SignalingService {
   public sendMessage(text: string) {
     if (this.roomId) {
       this.socket.emit('send_message', { room_id: this.roomId, text });
+    }
+  }
+}
+ }
+  }
+}
+ }
+
+  public async stopWaiting() {
+    await this.hangUp();
+  }
+
+  public sendMessage(text: string) {
+    if (this.roomId) {
+      this.socket.emit('send_message', { room_id: this.roomId, text });
+    }
+  }
+}
+('send_message', { room_id: this.roomId, text });
     }
   }
 }
