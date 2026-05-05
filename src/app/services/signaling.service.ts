@@ -287,12 +287,20 @@ export class SignalingService {
     };
   }
 
-  // Fallback ICE config — STUN only. TURN credentials MUST come from the server.
-  // Static Cloudflare TURN creds DO NOT WORK (Cloudflare requires dynamic API tokens).
-  // The deprecated openrelay.metered.ca is also removed.
+  // Fallback ICE config — ensures TURN is available even if the server fetch fails
+  // Using openrelay as a proven working fallback for restrictive networks.
   private static FALLBACK_ICE_CONFIG: RTCConfiguration = {
     iceServers: [
-      { urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302', 'stun:stun.cloudflare.com:3478'] }
+      { urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302', 'stun:stun.cloudflare.com:3478'] },
+      {
+        urls: [
+          'turn:openrelay.metered.ca:80',
+          'turn:openrelay.metered.ca:443',
+          'turn:openrelay.metered.ca:443?transport=tcp'
+        ],
+        username: 'openrelayproject',
+        credential: 'openrelayproject'
+      }
     ]
   };
 
@@ -300,24 +308,25 @@ export class SignalingService {
     // Always fetch fresh credentials - TURN tokens expire!
     return new Promise<void>((resolve) => {
       const timeout = setTimeout(() => {
-        console.warn('[Signaling] fetchIceServers TIMED OUT after 5s, using fallback (STUN only!)');
+        console.warn('[Signaling] fetchIceServers TIMED OUT after 10s, using fallback (STUN + OpenRelay TURN)');
         this.iceConfiguration = SignalingService.FALLBACK_ICE_CONFIG;
         resolve();
-      }, 5000);
+      }, 10000);
 
       this.socket.emit('get_ice_servers', {}, (data: any) => {
         clearTimeout(timeout);
         if (data && data.iceServers && data.iceServers.length > 0) {
-          const hasTurn = data.iceServers.some((s: any) =>
-            (s.urls || []).some((u: string) => u.startsWith('turn'))
-          );
+          const hasTurn = data.iceServers.some((s: any) => {
+            const urls = Array.isArray(s.urls) ? s.urls : (typeof s.urls === 'string' ? [s.urls] : []);
+            return urls.some((u: string) => u.startsWith('turn'));
+          });
           console.log(`[Signaling] ICE servers received: ${data.iceServers.length} entries, hasTURN=${hasTurn}`);
           if (!hasTurn) {
             console.warn('[Signaling] ⚠ No TURN servers from backend — connections on restrictive networks (Jio etc.) will FAIL');
           }
           this.iceConfiguration = data;
         } else {
-          console.warn('[Signaling] Invalid ICE config from server, using fallback (STUN only!)');
+          console.warn('[Signaling] Invalid ICE config from server, using fallback (STUN + OpenRelay TURN)');
           this.iceConfiguration = SignalingService.FALLBACK_ICE_CONFIG;
         }
         resolve();
