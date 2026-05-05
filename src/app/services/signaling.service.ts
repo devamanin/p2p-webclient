@@ -72,13 +72,16 @@ export class SignalingService {
     });
 
     this.socket.on('candidate', async (data: any) => {
+      console.log('[Signaling] << RECEIVED remote candidate:', data.candidate?.candidate?.substring(0, 80));
       if (this.peerConnection && this.isRemoteDescriptionSet) {
         try {
           await this.peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
-        } catch (e) { /* Ignore candidate errors during transitions */ }
+          console.log('[Signaling] ✓ Remote candidate added successfully');
+        } catch (e) { 
+          console.error('[Signaling] ✗ addIceCandidate FAILED:', e); 
+        }
       } else {
-        // Queue candidates if PeerConnection isn't ready or RemoteDescription isn't set
-        // This handles candidates arriving before the join handshake completes
+        console.log(`[Signaling] Queuing candidate (pc=${!!this.peerConnection}, remoteDescSet=${this.isRemoteDescriptionSet})`);
         this.candidateQueue.push(data.candidate);
       }
     });
@@ -226,12 +229,18 @@ export class SignalingService {
     this.peerConnection.onicecandidate = (event) => {
       if (event.candidate) {
         const candidateJson = event.candidate.toJSON();
+        const type = event.candidate.type || 'unknown';
+        const protocol = event.candidate.protocol || '?';
+        console.log(`[Signaling] >> LOCAL candidate: ${type} ${protocol} (roomId=${!!this.roomId}, peerJoined=${this.isPeerJoined})`);
         if (this.roomId && this.isPeerJoined) {
           this.socket.emit('send_candidate', { room_id: this.roomId, candidate: candidateJson });
+          console.log('[Signaling] >> Candidate SENT to server');
         } else {
-          // If the room isn't ready or peer hasn't joined yet, queue them
           this.earlyLocalCandidates.push(candidateJson);
+          console.log(`[Signaling] >> Candidate QUEUED locally (total: ${this.earlyLocalCandidates.length})`);
         }
+      } else {
+        console.log('[Signaling] >> ICE gathering COMPLETE (null candidate)');
       }
     };
     this.peerConnection.onconnectionstatechange = () => {
