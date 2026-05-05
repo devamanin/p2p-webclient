@@ -20,7 +20,7 @@ export type AdStatus =
   providedIn: 'root'
 })
 export class AdService {
-  private readonly API_KEY = '48fa3b3c-81c3-4545-b620-4f7d5aedba28';
+  private readonly API_KEY = 'a925c7d7-e8cb-476d-908b-5374ff5e9d45';
   private readonly DEV_ID = 36;    // Default Test ID
   private readonly GAME_ID = 3922; // Default Test ID
   private readonly ZONE_ID = 2050; // Default Test ID
