@@ -192,14 +192,15 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
             this.state = 'connected'; 
             this.remoteMetadata = this.signalingService.remoteMetadata;
             
-            // Start a 12-second timeout to prevent the endless "Connecting..." spinner
+            // Start a 25-second timeout to prevent the endless "Connecting..." spinner
+            // TURN relay on mobile networks (Jio/Airtel) can take 10-15 seconds to negotiate
             if (this.iceConnectionTimeout) clearTimeout(this.iceConnectionTimeout);
             this.iceConnectionTimeout = setTimeout(() => {
               if (this.state === 'connected' && !this.isConnected) {
                 console.warn('[Home] ICE Connection timeout! Forcing skip...');
                 this.handleNext();
               }
-            }, 12000);
+            }, 25000);
 
             if (this.remoteVideo?.nativeElement) {
               this.remoteVideo.nativeElement.srcObject = stream;
