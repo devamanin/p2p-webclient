@@ -1,21 +1,26 @@
 import { Routes } from '@angular/router';
-import { SplashComponent } from './components/splash/splash';
-import { HomeComponent } from './components/home/home';
-import { DeleteAccountComponent } from './components/delete-account/delete-account';
-import { PrivacyPolicyComponent } from './components/privacy-policy/privacy-policy';
-import { SafetyStandardsComponent } from './components/safety-standards/safety-standards';
 import { LandingComponent } from './components/landing/landing';
-import { CareersComponent } from './components/careers/careers';
-import { StoriesComponent } from './components/stories/stories';
 
 import { AuthGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
   { path: '', component: LandingComponent, title: 'blynq.app - Connect with the World' },
-  { path: 'login', component: SplashComponent, title: 'Login | blynq.app' },
+  { 
+    path: 'login', 
+    loadComponent: () => import('./components/splash/splash').then(m => m.SplashComponent),
+    title: 'Login | blynq.app' 
+  },
   { path: 'landing', redirectTo: '' },
-  { path: 'careers', component: CareersComponent, title: 'Careers | blynq.app' },
-  { path: 'stories', component: StoriesComponent, title: 'User Stories | blynq.app' },
+  { 
+    path: 'careers', 
+    loadComponent: () => import('./components/careers/careers').then(m => m.CareersComponent),
+    title: 'Careers | blynq.app' 
+  },
+  { 
+    path: 'stories', 
+    loadComponent: () => import('./components/stories/stories').then(m => m.StoriesComponent),
+    title: 'User Stories | blynq.app' 
+  },
   
   // Lazy Loaded SEO Landing Pages
   { 
@@ -64,10 +69,27 @@ export const routes: Routes = [
     title: 'India\'s #1 Omegle Alternative - Safe & Fast | blynq.app' 
   },
 
-  { path: 'home', component: HomeComponent, canActivate: [AuthGuard], title: 'Home | blynq.app' },
-  { path: 'delete-account', component: DeleteAccountComponent, title: 'Delete Account | blynq.app' },
-  { path: 'privacy-policy', component: PrivacyPolicyComponent, title: 'Privacy Policy | blynq.app' },
-  { path: 'safety-standards', component: SafetyStandardsComponent, title: 'Safety Standards | blynq.app' },
+  { 
+    path: 'home', 
+    loadComponent: () => import('./components/home/home').then(m => m.HomeComponent),
+    canActivate: [AuthGuard], 
+    title: 'Home | blynq.app' 
+  },
+  { 
+    path: 'delete-account', 
+    loadComponent: () => import('./components/delete-account/delete-account').then(m => m.DeleteAccountComponent),
+    title: 'Delete Account | blynq.app' 
+  },
+  { 
+    path: 'privacy-policy', 
+    loadComponent: () => import('./components/privacy-policy/privacy-policy').then(m => m.PrivacyPolicyComponent),
+    title: 'Privacy Policy | blynq.app' 
+  },
+  { 
+    path: 'safety-standards', 
+    loadComponent: () => import('./components/safety-standards/safety-standards').then(m => m.SafetyStandardsComponent),
+    title: 'Safety Standards | blynq.app' 
+  },
   { path: 'matching', redirectTo: 'home' },
   { path: 'video-chat', redirectTo: 'home' },
   { path: '**', redirectTo: '' }
