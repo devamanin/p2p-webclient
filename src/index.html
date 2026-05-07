@@ -46,8 +46,13 @@
   </script>
 
   <!-- Google Fonts -->
+  <!-- Resource Hints -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdn.applixir.com">
+  <link rel="preconnect" href="https://pagead2.googlesyndication.com">
+  <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+  <link rel="dns-prefetch" href="https://cdn.applixir.com">
   <link
     href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap"
     rel="stylesheet">
@@ -55,14 +60,17 @@
   <!-- Material Icons -->
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
+  <!-- Preload Critical Assets -->
+  <link rel="preload" as="image" href="assets/logo.svg">
+
   <!-- Google AdSense Verification -->
   <meta name="google-adsense-account" content="ca-pub-4905210385091071">
 
-  <!-- AppLixir v6 SDK -->
-  <script type="text/javascript" src="https://cdn.applixir.com/applixir.app.v6.0.1.js"></script>
+  <!-- AppLixir v6 SDK (Deferred for performance) -->
+  <script defer src="https://cdn.applixir.com/applixir.app.v6.0.1.js"></script>
 
-  <!-- Google AdSense SDK -->
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4905210385091071"
+  <!-- Google AdSense SDK (Deferred) -->
+  <script defer src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4905210385091071"
     crossorigin="anonymous"></script>
 </head>
 
