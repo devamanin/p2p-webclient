@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { SeoService } from './services/seo.service';
 
@@ -9,11 +9,19 @@ import { SeoService } from './services/seo.service';
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
-export class App {
+export class App implements OnInit {
   protected readonly title = signal('web-client');
   
   constructor(private seoService: SeoService) {
-    this.seoService.init();
-    console.log('App Component Initialized with SEO Service');
+    console.log('App Component Constructor');
+  }
+
+  ngOnInit() {
+    try {
+      this.seoService.init();
+      console.log('SEO Service initialized in ngOnInit');
+    } catch (error) {
+      console.error('Failed to initialize SEO Service:', error);
+    }
   }
 }

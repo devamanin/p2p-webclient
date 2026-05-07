@@ -26,50 +26,63 @@ export class SeoService {
       this.updateSeoTags();
     });
     
-    // Initial update
-    this.updateSeoTags();
+    // Delay initial update to ensure router state is fully initialized
+    setTimeout(() => {
+      this.updateSeoTags();
+    }, 0);
   }
 
   /**
    * Updates or creates the canonical link tag and social meta tags.
    */
   private updateSeoTags() {
-    // Get current path without query params or fragments
-    const path = this.router.url.split('?')[0].split('#')[0];
-    
-    // Normalize URL: avoid trailing slashes unless it's the root
-    const normalizedPath = path === '/' ? '' : path.replace(/\/$/, '');
-    const fullUrl = `${this.baseUrl}${normalizedPath}/`;
+    try {
+      if (!this.router || !this.router.url) return;
 
-    // 1. Update Canonical Link
-    let link: HTMLLinkElement | null = this.document.querySelector('link[rel="canonical"]');
-    if (!link) {
-      link = this.document.createElement('link');
-      link.setAttribute('rel', 'canonical');
-      this.document.head.appendChild(link);
-    }
-    link.setAttribute('href', fullUrl);
+      // Get current path without query params or fragments
+      const path = this.router.url.split('?')[0].split('#')[0];
+      
+      // Normalize URL: avoid trailing slashes unless it's the root
+      const normalizedPath = path === '/' ? '' : path.replace(/\/$/, '');
+      const fullUrl = `${this.baseUrl}${normalizedPath}/`;
 
-    // 2. Update Social URLs
-    this.meta.updateTag({ property: 'og:url', content: fullUrl });
-    this.meta.updateTag({ name: 'twitter:url', content: fullUrl });
+      // 1. Update Canonical Link
+      if (this.document && this.document.head) {
+        let link: HTMLLinkElement | null = this.document.querySelector('link[rel="canonical"]');
+        if (!link) {
+          link = this.document.createElement('link');
+          link.setAttribute('rel', 'canonical');
+          this.document.head.appendChild(link);
+        }
+        link.setAttribute('href', fullUrl);
+      }
 
-    // 3. Update Description and Keywords from Route Data
-    let route = this.router.routerState.snapshot.root;
-    while (route.firstChild) {
-      route = route.firstChild;
-    }
-    
-    const data = route.data;
-    
-    if (data['description']) {
-      this.meta.updateTag({ name: 'description', content: data['description'] });
-      this.meta.updateTag({ property: 'og:description', content: data['description'] });
-      this.meta.updateTag({ name: 'twitter:description', content: data['description'] });
-    }
+      // 2. Update Social URLs
+      this.meta.updateTag({ property: 'og:url', content: fullUrl });
+      this.meta.updateTag({ name: 'twitter:url', content: fullUrl });
 
-    if (data['keywords']) {
-      this.meta.updateTag({ name: 'keywords', content: data['keywords'] });
+      // 3. Update Description and Keywords from Route Data
+      if (this.router.routerState && this.router.routerState.snapshot) {
+        let route = this.router.routerState.snapshot.root;
+        while (route.firstChild) {
+          route = route.firstChild;
+        }
+        
+        const data = route.data;
+        if (data) {
+          if (data['description']) {
+            this.meta.updateTag({ name: 'description', content: data['description'] });
+            this.meta.updateTag({ property: 'og:description', content: data['description'] });
+            this.meta.updateTag({ name: 'twitter:description', content: data['description'] });
+          }
+
+          if (data['keywords']) {
+            this.meta.updateTag({ name: 'keywords', content: data['keywords'] });
+          }
+        }
+      }
+    } catch (error) {
+      console.error('SeoService: Error updating SEO tags', error);
     }
   }
 }
