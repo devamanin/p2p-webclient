@@ -11,15 +11,15 @@ import { StoriesComponent } from './components/stories/stories';
 import { AuthGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
-  { path: '', component: LandingComponent },
-  { path: 'login', component: SplashComponent },
+  { path: '', component: LandingComponent, title: 'blynq.app - Connect with the World' },
+  { path: 'login', component: SplashComponent, title: 'Login | blynq.app' },
   { path: 'landing', redirectTo: '' },
-  { path: 'careers', component: CareersComponent },
-  { path: 'stories', component: StoriesComponent },
-  { path: 'home', component: HomeComponent, canActivate: [AuthGuard] },
-  { path: 'delete-account', component: DeleteAccountComponent },
-  { path: 'privacy-policy', component: PrivacyPolicyComponent },
-  { path: 'safety-standards', component: SafetyStandardsComponent },
+  { path: 'careers', component: CareersComponent, title: 'Careers | blynq.app' },
+  { path: 'stories', component: StoriesComponent, title: 'User Stories | blynq.app' },
+  { path: 'home', component: HomeComponent, canActivate: [AuthGuard], title: 'Home | blynq.app' },
+  { path: 'delete-account', component: DeleteAccountComponent, title: 'Delete Account | blynq.app' },
+  { path: 'privacy-policy', component: PrivacyPolicyComponent, title: 'Privacy Policy | blynq.app' },
+  { path: 'safety-standards', component: SafetyStandardsComponent, title: 'Safety Standards | blynq.app' },
   { path: 'matching', redirectTo: 'home' },
   { path: 'video-chat', redirectTo: 'home' },
   { path: '**', redirectTo: '' }

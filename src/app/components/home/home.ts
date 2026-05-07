@@ -227,31 +227,43 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
             this.isConnected = true;
             this.cdr.detectChanges();
             
-            // 🐛 FIX: Force the browser to render the video. 
+            // 🐛 FIX: Force the browser to render the video safely.
             setTimeout(() => {
               if (this.remoteVideo?.nativeElement && this.signalingService.remoteStream) {
                 const video = this.remoteVideo.nativeElement;
                 const stream = this.signalingService.remoteStream;
-                
-                // Only re-bind if the stream actually has a video track
+
+                // Only interact if the stream actually has a video track
                 if (stream.getVideoTracks().length > 0) {
-                  video.srcObject = null;
-                  video.srcObject = stream;
-                  
-                  // Safari/Mobile fix: play muted first, then unmute
-                  video.muted = true;
-                  video.play().then(() => {
-                    video.muted = false; // Unmute immediately after successful play
-                  }).catch(e => {
-                    console.error('[Home] Video play error (Autoplay blocked):', e);
-                    video.muted = false;
-                  });
+                  // CRITICAL: Avoid unsetting srcObject if it's already set to the same stream.
+                  // Unsetting it triggers a new load request, aborting any ongoing play() promise.
+                  if (video.srcObject !== stream) {
+                    video.srcObject = stream;
+                  }
+
+                  // If the video is paused, or hasn't started playing yet
+                  if (video.paused) {
+                    // Safari/Mobile fix: play muted first, then unmute
+                    video.muted = true;
+                    const playPromise = video.play();
+
+                    if (playPromise !== undefined) {
+                      playPromise.then(() => {
+                        video.muted = false; // Unmute immediately after successful play
+                      }).catch((e: any) => {
+                        // Ignore AbortError if it's due to a completely new stream loading
+                        if (e.name !== 'AbortError') {
+                          console.error('[Home] Video play error (Autoplay blocked):', e);
+                        }
+                        video.muted = false;
+                      });
+                    }
+                  }
                 } else {
                   console.warn('[Home] Connected, but no video track found in the remote stream!');
                 }
               }
-            }, 150);
-          } else if (state === 'failed') {
+            }, 150);          } else if (state === 'failed') {
             console.error('[Home] ICE Connection failed. TURN server likely rejecting credentials.');
             if (this.iceConnectionTimeout) clearTimeout(this.iceConnectionTimeout);
             // Hang up automatically if it fails to connect
