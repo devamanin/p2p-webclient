@@ -15,6 +15,7 @@ import { OmetvAlternativeComponent } from './components/ometv-alternative/ometv-
 import { ChatrouletteAlternativeComponent } from './components/chatroulette-alternative/chatroulette-alternative';
 import { VideoChatWithGirlsComponent } from './components/video-chat-with-girls/video-chat-with-girls';
 import { VideoChatWithStrangersComponent } from './components/video-chat-with-strangers/video-chat-with-strangers';
+import { OmegleIndiaComponent } from './components/omegle-india/omegle-india';
 
 import { AuthGuard } from './guards/auth.guard';
 
@@ -32,6 +33,7 @@ export const routes: Routes = [
   { path: 'chatroulette-alternative', component: ChatrouletteAlternativeComponent, title: 'Chatroulette Alternative - Global Video Chat | blynq.app' },
   { path: 'video-chat-with-girls', component: VideoChatWithGirlsComponent, title: 'Video Chat with Girls - Safe & Instant | blynq.app' },
   { path: 'video-chat-with-strangers', component: VideoChatWithStrangersComponent, title: 'Video Chat with Strangers - Global & Free | blynq.app' },
+  { path: 'omegle-india', component: OmegleIndiaComponent, title: 'India\'s #1 Omegle Alternative - Safe & Fast | blynq.app' },
   { path: 'home', component: HomeComponent, canActivate: [AuthGuard], title: 'Home | blynq.app' },
   { path: 'delete-account', component: DeleteAccountComponent, title: 'Delete Account | blynq.app' },
   { path: 'privacy-policy', component: PrivacyPolicyComponent, title: 'Privacy Policy | blynq.app' },

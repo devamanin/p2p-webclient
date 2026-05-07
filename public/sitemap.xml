@@ -61,6 +61,11 @@
     <changefreq>weekly</changefreq>
   </url>
   <url>
+    <loc>https://blynq.app/omegle-india</loc>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+  <url>
     <loc>https://blynq.app/delete-account</loc>
     <priority>0.5</priority>
     <changefreq>yearly</changefreq>
