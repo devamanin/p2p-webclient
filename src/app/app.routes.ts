@@ -26,7 +26,11 @@ export const routes: Routes = [
   { 
     path: 'omegle-alternative', 
     loadComponent: () => import('./components/omegle-alternative/omegle-alternative').then(m => m.OmegleAlternativeComponent),
-    title: 'Omegle Alternative #1 Free and Safe | blynq.app' 
+    title: 'Omegle Alternative #1 Free and Safe | blynq.app',
+    data: {
+      description: 'Looking for the best Omegle alternative? blynq.app offers a free, safe, and instant random video chat experience to connect with people globally.',
+      keywords: 'omegle alternative, random video chat, free chat, meet strangers'
+    }
   },
   { 
     path: 'random-video-chat', 
@@ -56,7 +60,11 @@ export const routes: Routes = [
   { 
     path: 'video-chat-with-girls', 
     loadComponent: () => import('./components/video-chat-with-girls/video-chat-with-girls').then(m => m.VideoChatWithGirlsComponent),
-    title: 'Video Chat with Girls - Safe & Instant | blynq.app' 
+    title: 'Video Chat with Girls - Safe & Instant | blynq.app',
+    data: {
+      description: 'Join blynq.app for high-quality video chat with girls. Our platform ensures a safe and respectful community for meaningful connections.',
+      keywords: 'video chat with girls, girl chat, random video chat, safe chat'
+    }
   },
   { 
     path: 'video-chat-with-strangers', 
@@ -66,7 +74,11 @@ export const routes: Routes = [
   { 
     path: 'omegle-india', 
     loadComponent: () => import('./components/omegle-india/omegle-india').then(m => m.OmegleIndiaComponent),
-    title: 'India\'s #1 Omegle Alternative - Safe & Fast | blynq.app' 
+    title: 'India\'s #1 Omegle Alternative - Safe & Fast | blynq.app',
+    data: {
+      description: 'The best Omegle alternative for India. Connect with people across India and globally through blynq.app\'s fast and secure video chat.',
+      keywords: 'omegle india, omegle alternative india, indian video chat, random chat india'
+    }
   },
 
   { 

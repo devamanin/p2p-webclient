@@ -1,5 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { SeoService } from './services/seo.service';
 
 @Component({
   selector: 'app-root',
@@ -11,7 +12,8 @@ import { RouterOutlet } from '@angular/router';
 export class App {
   protected readonly title = signal('web-client');
   
-  constructor() {
-    console.log('App Component Initialized');
+  constructor(private seoService: SeoService) {
+    this.seoService.init();
+    console.log('App Component Initialized with SEO Service');
   }
 }
