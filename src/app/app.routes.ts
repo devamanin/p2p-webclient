@@ -7,6 +7,8 @@ import { SafetyStandardsComponent } from './components/safety-standards/safety-s
 import { LandingComponent } from './components/landing/landing';
 import { CareersComponent } from './components/careers/careers';
 import { StoriesComponent } from './components/stories/stories';
+import { OmegleAlternativeComponent } from './components/omegle-alternative/omegle-alternative';
+import { RandomChatComponent } from './components/random-chat/random-chat';
 
 import { AuthGuard } from './guards/auth.guard';
 
@@ -16,6 +18,8 @@ export const routes: Routes = [
   { path: 'landing', redirectTo: '' },
   { path: 'careers', component: CareersComponent, title: 'Careers | blynq.app' },
   { path: 'stories', component: StoriesComponent, title: 'User Stories | blynq.app' },
+  { path: 'omegle-alternative', component: OmegleAlternativeComponent, title: 'blynq - The #1 Free and Safe Omegle Alternative' },
+  { path: 'random-video-chat', component: RandomChatComponent, title: 'blynq - Free Live Random Video Chat' },
   { path: 'home', component: HomeComponent, canActivate: [AuthGuard], title: 'Home | blynq.app' },
   { path: 'delete-account', component: DeleteAccountComponent, title: 'Delete Account | blynq.app' },
   { path: 'privacy-policy', component: PrivacyPolicyComponent, title: 'Privacy Policy | blynq.app' },

@@ -52,7 +52,20 @@
     </div>
   </main>
   
-  <footer class="border-t border-white/5 py-8 text-center text-white/30 text-xs font-medium relative z-20">
-    © 2026 blynq.app. All rights reserved.
+  <footer class="w-full shrink-0 border-t border-white/5 py-12 px-6 bg-[#0E0E11]">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+      <div class="flex items-center space-x-2">
+        <img src="assets/logo.svg" alt="logo" class="w-6 h-6 grayscale opacity-50">
+        <span class="font-space font-bold text-white/50">© 2026 blynq.app</span>
+      </div>
+      <div class="flex flex-wrap gap-6 text-sm font-medium text-white/40">
+        <a routerLink="/stories" class="hover:text-white transition-colors">Stories</a>
+        <a routerLink="/privacy-policy" class="hover:text-white transition-colors">Privacy Policy</a>
+        <a routerLink="/safety-standards" class="hover:text-white transition-colors">Safety</a>
+        <!-- Programmatic SEO Footer Links -->
+        <a routerLink="/omegle-alternative" class="hover:text-[#D674FF] transition-colors ml-4 border-l border-white/10 pl-4">Omegle Alternative</a>
+        <a routerLink="/random-video-chat" class="hover:text-[#69DAFF] transition-colors">Random Video Chat</a>
+      </div>
+    </div>
   </footer>
 </div>
