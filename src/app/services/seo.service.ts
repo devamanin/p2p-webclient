@@ -44,7 +44,7 @@ export class SeoService {
       
       // Normalize URL: avoid trailing slashes unless it's the root
       const normalizedPath = path === '/' ? '' : path.replace(/\/$/, '');
-      const fullUrl = `${this.baseUrl}${normalizedPath}/`;
+      const fullUrl = `${this.baseUrl}${normalizedPath}`;
 
       // 1. Update Canonical Link
       if (this.document && this.document.head) {
@@ -57,9 +57,15 @@ export class SeoService {
         link.setAttribute('href', fullUrl);
       }
 
-      // 2. Update Social URLs
+      // 2. Update Social URLs and Titles
       this.meta.updateTag({ property: 'og:url', content: fullUrl });
       this.meta.updateTag({ name: 'twitter:url', content: fullUrl });
+      
+      const title = this.document.title;
+      if (title) {
+        this.meta.updateTag({ property: 'og:title', content: title });
+        this.meta.updateTag({ name: 'twitter:title', content: title });
+      }
 
       // 3. Update Description and Keywords from Route Data
       if (this.router.routerState && this.router.routerState.snapshot) {

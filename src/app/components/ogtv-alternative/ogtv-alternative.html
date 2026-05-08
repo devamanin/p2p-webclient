@@ -44,15 +44,15 @@
     </div>
   </main>
 
-  <section #pinSection class="relative w-full h-[600vh] bg-[#0E0E11] border-t border-white/5">
-    <div class="sticky top-0 h-screen w-full flex flex-col items-center justify-center overflow-hidden">
+  <section class="relative w-full bg-[#0E0E11] border-t border-white/5 py-24">
+    <div class="w-full flex flex-col items-center justify-center relative">
       
       <div class="absolute inset-0 overflow-hidden pointer-events-none">
         <div class="absolute top-[20%] -left-48 w-[600px] h-[600px] bg-[#69DAFF]/5 rounded-full blur-[150px] animate-pulse"></div>
         <div class="absolute bottom-[20%] -right-48 w-[600px] h-[600px] bg-[#D674FF]/5 rounded-full blur-[150px] animate-pulse"></div>
       </div>
 
-      <div #pinHeader class="absolute top-24 z-50 text-center px-6 transition-all duration-700 ease-out">
+      <div class="text-center px-6 mb-16 z-10">
         <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#69DAFF]/10 border border-[#69DAFF]/20 mb-4 text-[#69DAFF] text-xs font-bold tracking-widest uppercase transition-colors duration-500">
           <span>Superior to OGTV</span>
         </div>
@@ -60,10 +60,10 @@
       </div>
 
       <!-- Feature Stack -->
-      <div class="relative w-full max-w-6xl h-[75vh] min-h-[450px] px-6 mt-20">
+      <div class="w-full max-w-6xl px-6 flex flex-col gap-8 z-10">
         
         <!-- Feature 1 -->
-        <div #featureCard class="feature-stack-card absolute inset-0 flex items-center justify-center" style="opacity: 1; transform: translateY(0);">
+        <div class="flex items-center justify-center bg-white/5 border border-white/10 rounded-[3rem] overflow-hidden">
           <div class="p-8 md:p-12 rounded-[3rem] w-full h-full flex flex-col md:flex-row items-center gap-12 group">
             <div class="flex-1 text-center md:text-left">
               <div class="inline-flex w-16 h-16 bg-[#69DAFF]/20 rounded-2xl items-center justify-center mb-6 border border-[#69DAFF]/20 shadow-[0_0_20px_rgba(105,218,255,0.15)]">
@@ -82,7 +82,7 @@
         </div>
 
         <!-- Feature 2 -->
-        <div #featureCard class="feature-stack-card absolute inset-0 flex items-center justify-center" style="opacity: 0; transform: translateY(100px);">
+        <div class="flex items-center justify-center bg-white/5 border border-white/10 rounded-[3rem] overflow-hidden">
           <div class="p-8 md:p-12 rounded-[3rem] w-full h-full flex flex-col md:flex-row items-center gap-12 group">
             <div class="flex-1 text-center md:text-left">
               <div class="inline-flex w-16 h-16 bg-[#D674FF]/20 rounded-2xl items-center justify-center mb-6 border border-[#D674FF]/20 shadow-[0_0_20px_rgba(214,116,255,0.15)]">
@@ -102,14 +102,7 @@
 
       </div>
 
-      <!-- Scroll Indicator Dot -->
-      <div class="absolute bottom-12 flex flex-col items-center space-y-4">
-        <div class="flex space-x-2">
-          <div #dot class="w-2 h-2 rounded-full bg-white/20 transition-all duration-500"></div>
-          <div #dot class="w-2 h-2 rounded-full bg-white/20 transition-all duration-500"></div>
-        </div>
-        <span class="text-[10px] font-space font-bold text-white/20 tracking-[4px] uppercase">Scroll Through Features</span>
-      </div>
+      
 
     </div>
 
