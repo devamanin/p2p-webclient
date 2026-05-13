@@ -125,11 +125,49 @@ export const routes: Routes = [
     }
   },
 
+  // Blog
+  { 
+    path: 'blog', 
+    loadComponent: () => import('./components/blog/blog').then(m => m.BlogComponent),
+    title: 'Blog — Video Chat Tips, Safety Guides & Technology | blynq.app',
+    data: {
+      description: 'Expert guides on video chat safety, technology deep dives, conversation tips, and insights on building meaningful connections online. The official blynq.app blog.',
+      keywords: 'video chat blog, online safety tips, WebRTC technology, video chat guide, blynq blog'
+    }
+  },
+  { 
+    path: 'blog/:slug', 
+    loadComponent: () => import('./components/blog/blog-post').then(m => m.BlogPostComponent),
+    title: 'Blog | blynq.app',
+    data: {
+      description: 'Read in-depth articles on video chat safety, technology, and tips from the blynq.app team.',
+      keywords: 'video chat, blog, guides, tips'
+    }
+  },
+
   { 
     path: 'home', 
     loadComponent: () => import('./components/home/home').then(m => m.HomeComponent),
     canActivate: [AuthGuard], 
     title: 'Home | blynq.app' 
+  },
+  { 
+    path: 'terms-of-service', 
+    loadComponent: () => import('./components/terms-of-service/terms-of-service').then(m => m.TermsOfServiceComponent),
+    title: 'Terms of Service | blynq.app',
+    data: {
+      description: 'Read the blynq.app Terms of Service. Understand the rules, policies, and guidelines that govern the use of our video chat platform.',
+      keywords: 'terms of service, terms and conditions, user agreement, blynq policies'
+    }
+  },
+  { 
+    path: 'contact', 
+    loadComponent: () => import('./components/contact/contact').then(m => m.ContactComponent),
+    title: 'Contact Us | blynq.app',
+    data: {
+      description: 'Get in touch with the blynq.app team. Contact us for support, safety concerns, business inquiries, or partnership opportunities.',
+      keywords: 'contact, support, help, blynq support, customer service'
+    }
   },
   { 
     path: 'delete-account', 

@@ -7,6 +7,7 @@
       <span class="font-space font-bold text-xl tracking-[2px] text-white drop-shadow-[0_0_12px_rgba(105,218,255,0.8)]">blynq.app</span>
     </div>
     <div class="flex items-center space-x-6">
+      <a routerLink="/blog" class="text-sm font-medium text-white/60 hover:text-white transition-colors hidden md:block">Blog</a>
       <a routerLink="/stories" class="text-sm font-medium text-white/60 hover:text-white transition-colors hidden md:block">Stories</a>
       <a routerLink="/careers" class="text-sm font-medium text-white/60 hover:text-white transition-colors hidden md:block">Careers</a>
       <a routerLink="/safety-standards" class="text-sm font-medium text-white/60 hover:text-white transition-colors hidden md:block">Safety</a>
@@ -170,28 +171,209 @@
 
   </section>
 
+  <!-- How It Works Section -->
+  <section class="relative w-full bg-[#0E0E11] border-t border-white/5 py-24">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="text-center mb-16">
+        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#D674FF]/10 border border-[#D674FF]/20 mb-4 text-[#D674FF] text-xs font-bold tracking-widest uppercase">
+          <span>Simple & Fast</span>
+        </div>
+        <h2 class="text-3xl md:text-5xl font-space font-black text-white mb-4">How blynq.app Works</h2>
+        <p class="text-white/50 text-lg max-w-2xl mx-auto">Getting started takes less than a minute. No downloads, no complicated sign-ups — just real human connection at the click of a button.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Step 1 -->
+        <div class="relative bg-white/5 border border-white/10 rounded-3xl p-8 text-center group hover:border-[#69DAFF]/30 transition-all">
+          <div class="absolute -top-5 left-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-gradient-to-r from-[#69DAFF] to-[#D674FF] flex items-center justify-center text-white font-black text-lg shadow-lg">1</div>
+          <div class="w-16 h-16 mx-auto mb-6 mt-4 bg-[#69DAFF]/10 rounded-2xl flex items-center justify-center border border-[#69DAFF]/20">
+            <span class="material-icons text-3xl text-[#69DAFF]">person_add</span>
+          </div>
+          <h3 class="text-xl font-bold font-space mb-3">Create Your Profile</h3>
+          <p class="text-white/50 leading-relaxed">Sign up with Google or your email in seconds. Add your interests, select your preferred languages, and set your matching preferences. Your profile helps our algorithm find the best matches for you.</p>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="relative bg-white/5 border border-white/10 rounded-3xl p-8 text-center group hover:border-[#D674FF]/30 transition-all">
+          <div class="absolute -top-5 left-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-gradient-to-r from-[#69DAFF] to-[#D674FF] flex items-center justify-center text-white font-black text-lg shadow-lg">2</div>
+          <div class="w-16 h-16 mx-auto mb-6 mt-4 bg-[#D674FF]/10 rounded-2xl flex items-center justify-center border border-[#D674FF]/20">
+            <span class="material-icons text-3xl text-[#D674FF]">tune</span>
+          </div>
+          <h3 class="text-xl font-bold font-space mb-3">Set Your Filters</h3>
+          <p class="text-white/50 leading-relaxed">Choose who you want to meet. Filter by gender, location, and shared interests. Use Real Mode to find people near you, or go global to connect with someone on the other side of the world.</p>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="relative bg-white/5 border border-white/10 rounded-3xl p-8 text-center group hover:border-[#4ADE80]/30 transition-all">
+          <div class="absolute -top-5 left-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-gradient-to-r from-[#69DAFF] to-[#D674FF] flex items-center justify-center text-white font-black text-lg shadow-lg">3</div>
+          <div class="w-16 h-16 mx-auto mb-6 mt-4 bg-[#4ADE80]/10 rounded-2xl flex items-center justify-center border border-[#4ADE80]/20">
+            <span class="material-icons text-3xl text-[#4ADE80]">videocam</span>
+          </div>
+          <h3 class="text-xl font-bold font-space mb-3">Start Connecting</h3>
+          <p class="text-white/50 leading-relaxed">Hit the connect button and you will be matched with someone instantly. Enjoy crystal-clear HD video and audio powered by peer-to-peer WebRTC technology. Add friends, chat offline, and build lasting connections.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats / Social Proof Section -->
+  <section class="relative w-full bg-[#0E0E11] border-t border-white/5 py-24 overflow-hidden">
+    <div class="absolute inset-0 pointer-events-none">
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[#69DAFF]/3 rounded-full blur-[200px]"></div>
+    </div>
+    <div class="max-w-6xl mx-auto px-6 relative z-10">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl md:text-5xl font-space font-black text-white mb-4">Trusted by Thousands Worldwide</h2>
+        <p class="text-white/50 text-lg max-w-2xl mx-auto">Our community is growing every day. People from over 50 countries use blynq.app to make genuine human connections.</p>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-6 text-center">
+          <p class="text-3xl md:text-4xl font-space font-black text-transparent bg-clip-text bg-gradient-to-r from-[#69DAFF] to-[#D674FF]">50+</p>
+          <p class="text-white/50 text-sm font-medium mt-2">Countries Reached</p>
+        </div>
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-6 text-center">
+          <p class="text-3xl md:text-4xl font-space font-black text-transparent bg-clip-text bg-gradient-to-r from-[#69DAFF] to-[#D674FF]">100K+</p>
+          <p class="text-white/50 text-sm font-medium mt-2">Video Connections Made</p>
+        </div>
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-6 text-center">
+          <p class="text-3xl md:text-4xl font-space font-black text-transparent bg-clip-text bg-gradient-to-r from-[#69DAFF] to-[#D674FF]">4.8★</p>
+          <p class="text-white/50 text-sm font-medium mt-2">Average User Rating</p>
+        </div>
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-6 text-center">
+          <p class="text-3xl md:text-4xl font-space font-black text-transparent bg-clip-text bg-gradient-to-r from-[#69DAFF] to-[#D674FF]">&lt;2s</p>
+          <p class="text-white/50 text-sm font-medium mt-2">Average Match Time</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About blynq Section -->
+  <section class="relative w-full bg-[#0E0E11] border-t border-white/5 py-24">
+    <div class="max-w-5xl mx-auto px-6">
+      <div class="text-center mb-12">
+        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#4ADE80]/10 border border-[#4ADE80]/20 mb-4 text-[#4ADE80] text-xs font-bold tracking-widest uppercase">
+          <span>Our Mission</span>
+        </div>
+        <h2 class="text-3xl md:text-5xl font-space font-black text-white mb-6">About blynq.app</h2>
+      </div>
+      <div class="bg-white/5 border border-white/10 rounded-3xl p-8 md:p-12 space-y-6 text-white/60 text-lg leading-relaxed">
+        <p>
+          <strong class="text-white">blynq.app</strong> was founded with a simple but ambitious mission: to make genuine human connection accessible to everyone, everywhere. In a world where social media often leaves people feeling more isolated than ever, we built a platform that prioritizes real, face-to-face conversations between real people.
+        </p>
+        <p>
+          Unlike traditional social media platforms that measure success by likes and followers, blynq measures success by the quality of conversations and the friendships that form. Our smart matching algorithm considers your interests, preferred languages, and location preferences to pair you with people you are most likely to genuinely connect with — not just random strangers.
+        </p>
+        <p>
+          Safety is at the core of everything we do. Every video call on blynq is protected by end-to-end peer-to-peer encryption via WebRTC technology, meaning your conversations are never stored on or routed through our servers. We also employ real-time content moderation, one-tap reporting and blocking tools, and strict community guidelines to ensure that blynq remains a safe and respectful environment for users of all backgrounds.
+        </p>
+        <p>
+          Whether you are a student looking to practice a new language, a traveler wanting to learn about a destination from locals, or simply someone who enjoys meeting new people from different cultures, blynq.app provides the platform and the community to make it happen. Available on web, Android, and iOS, you can start connecting from any device, anywhere in the world.
+        </p>
+        <div class="flex flex-wrap gap-4 pt-4">
+          <a routerLink="/safety-standards" class="inline-flex items-center space-x-2 text-[#69DAFF] font-bold text-sm hover:underline">
+            <span class="material-icons text-sm">shield</span>
+            <span>Read Our Safety Standards</span>
+          </a>
+          <a routerLink="/privacy-policy" class="inline-flex items-center space-x-2 text-[#D674FF] font-bold text-sm hover:underline">
+            <span class="material-icons text-sm">lock</span>
+            <span>View Privacy Policy</span>
+          </a>
+          <a routerLink="/stories" class="inline-flex items-center space-x-2 text-[#4ADE80] font-bold text-sm hover:underline">
+            <span class="material-icons text-sm">auto_stories</span>
+            <span>Read User Stories</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section class="relative w-full bg-[#0E0E11] border-t border-white/5 py-24">
+    <div class="max-w-4xl mx-auto px-6">
+      <div class="text-center mb-16">
+        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#FACC15]/10 border border-[#FACC15]/20 mb-4 text-[#FACC15] text-xs font-bold tracking-widest uppercase">
+          <span>Got Questions?</span>
+        </div>
+        <h2 class="text-3xl md:text-5xl font-space font-black text-white mb-4">Frequently Asked Questions</h2>
+        <p class="text-white/50 text-lg max-w-2xl mx-auto">Everything you need to know about blynq.app. Can't find the answer you're looking for? Reach out to our support team.</p>
+      </div>
+
+      <div class="space-y-4">
+        <div *ngFor="let faq of faqs" class="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+          <button (click)="toggleFaq(faq)" class="w-full flex items-center justify-between p-6 text-left hover:bg-white/5 transition-colors">
+            <h3 class="text-lg font-bold text-white pr-4">{{ faq.question }}</h3>
+            <span class="material-icons text-white/40 shrink-0 transition-transform duration-300" [class.rotate-180]="faq.open">expand_more</span>
+          </button>
+          <div *ngIf="faq.open" class="px-6 pb-6 text-white/60 leading-relaxed">
+            <p>{{ faq.answer }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="relative w-full bg-[#0E0E11] border-t border-white/5 py-24">
+    <div class="max-w-4xl mx-auto px-6 text-center">
+      <h2 class="text-3xl md:text-5xl font-space font-black text-white mb-6">Ready to Connect?</h2>
+      <p class="text-white/50 text-lg max-w-2xl mx-auto mb-10">Join thousands of users from 50+ countries who are already making meaningful connections on blynq.app. It is completely free to get started.</p>
+      <a routerLink="/login" class="inline-flex items-center justify-center space-x-2 bg-gradient-to-r from-[#69DAFF] to-[#D674FF] text-white px-10 py-5 rounded-full font-black text-lg hover:scale-105 transition-transform shadow-[0_0_40px_rgba(105,218,255,0.3)]">
+        <span class="material-icons">videocam</span>
+        <span>Start Video Chatting Now</span>
+      </a>
+    </div>
+  </section>
 
   <!-- Footer -->
   <footer class="w-full shrink-0 border-t border-white/5 py-12 px-6 bg-[#0E0E11]">
-    <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-      <div class="flex items-center space-x-2">
-        <img src="assets/logo.svg" alt="logo" class="w-6 h-6 grayscale opacity-50">
-        <span class="font-space font-bold text-white/50">© 2026 blynq.app</span>
+    <div class="max-w-6xl mx-auto">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-10 mb-10">
+        <!-- Brand -->
+        <div>
+          <div class="flex items-center space-x-2 mb-4">
+            <img src="assets/logo.svg" alt="blynq.app logo" class="w-7 h-7">
+            <span class="font-space font-bold text-lg text-white">blynq.app</span>
+          </div>
+          <p class="text-white/40 text-sm leading-relaxed">The next generation of video chat. Connect with people from around the world through safe, high-quality peer-to-peer video calls.</p>
+        </div>
+        <!-- Product -->
+        <div>
+          <h4 class="text-white font-bold text-sm uppercase tracking-wider mb-4">Product</h4>
+          <div class="flex flex-col space-y-3 text-sm text-white/40">
+            <a routerLink="/login" class="hover:text-white transition-colors">Launch App</a>
+            <a routerLink="/blog" class="hover:text-white transition-colors">Blog</a>
+            <a routerLink="/stories" class="hover:text-white transition-colors">User Stories</a>
+            <a routerLink="/careers" class="hover:text-white transition-colors">Careers</a>
+          </div>
+        </div>
+        <!-- Legal -->
+        <div>
+          <h4 class="text-white font-bold text-sm uppercase tracking-wider mb-4">Legal</h4>
+          <div class="flex flex-col space-y-3 text-sm text-white/40">
+            <a routerLink="/privacy-policy" class="hover:text-white transition-colors">Privacy Policy</a>
+            <a routerLink="/terms-of-service" class="hover:text-white transition-colors">Terms of Service</a>
+            <a routerLink="/safety-standards" class="hover:text-white transition-colors">Safety Standards</a>
+            <a routerLink="/contact" class="hover:text-white transition-colors">Contact Us</a>
+          </div>
+        </div>
+        <!-- Alternatives -->
+        <div>
+          <h4 class="text-white font-bold text-sm uppercase tracking-wider mb-4">Alternatives</h4>
+          <div class="flex flex-col space-y-3 text-sm text-white/40">
+            <a routerLink="/omegle-alternative" class="hover:text-white transition-colors">Omegle Alternative</a>
+            <a routerLink="/random-video-chat" class="hover:text-white transition-colors">Random Video Chat</a>
+            <a routerLink="/ometv-alternative" class="hover:text-white transition-colors">Ome.tv Alternative</a>
+            <a routerLink="/chatroulette-alternative" class="hover:text-white transition-colors">Chatroulette Alternative</a>
+            <a routerLink="/video-chat-with-strangers" class="hover:text-white transition-colors">Video Chat with Strangers</a>
+            <a routerLink="/omegle-india" class="hover:text-white transition-colors">Omegle India</a>
+          </div>
+        </div>
       </div>
-      <div class="flex flex-wrap gap-6 text-sm font-medium text-white/40">
-        <a routerLink="/stories" class="hover:text-white transition-colors">Stories</a>
-        <a routerLink="/careers" class="hover:text-white transition-colors">Careers</a>
-        <a routerLink="/privacy-policy" class="hover:text-white transition-colors">Privacy Policy</a>
-        <a routerLink="/safety-standards" class="hover:text-white transition-colors">Safety</a>
-        <a routerLink="/omegle-alternative" class="hover:text-white transition-colors">Omegle Alternative</a>
-        <a routerLink="/random-video-chat" class="hover:text-white transition-colors">Random Video Chat</a>
-        <a routerLink="/ogtv-alternative" class="hover:text-white transition-colors">OGTV Alternative</a>
-        <a routerLink="/monkey-app-alternative" class="hover:text-white transition-colors">Monkey App Alternative</a>
-        <a routerLink="/ometv-alternative" class="hover:text-white transition-colors">Ome.tv Alternative</a>
-        <a routerLink="/chatroulette-alternative" class="hover:text-white transition-colors">Chatroulette Alternative</a>
-        <a routerLink="/video-chat-with-girls" class="hover:text-white transition-colors">Video Chat with Girls</a>
-        <a routerLink="/video-chat-with-strangers" class="hover:text-white transition-colors">Video Chat with Strangers</a>
-        <a routerLink="/omegle-india" class="hover:text-white transition-colors">India's #1 Omegle Alternative</a>
+      <div class="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+        <span class="font-space font-bold text-white/30 text-sm">© 2026 blynq.app — All rights reserved.</span>
+        <div class="flex gap-6 text-sm text-white/30">
+          <a href="mailto:support@blynq.app" class="hover:text-white transition-colors">support&#64;blynq.app</a>
+        </div>
       </div>
     </div>
   </footer>

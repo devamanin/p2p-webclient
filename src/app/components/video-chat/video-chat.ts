@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { SignalingService } from '../../services/signaling.service';
 import { Subscription } from 'rxjs';
-
+import * as nsfwjs from 'nsfwjs';
 @Component({
   selector: 'app-video-chat',
   standalone: true,
@@ -18,9 +18,12 @@ export class VideoChatComponent implements OnInit, AfterViewInit, OnDestroy {
   public isMuted = false;
   public isCameraOff = false;
   public isConnected = false; // NEW: Track connection state
+  public isNSFW = false;
   public remoteMetadata: any = null;
   private subscriptions: Subscription[] = [];
   private isTransitioning = false;
+  private nsfwModel: nsfwjs.NSFWJS | null = null;
+  private nsfwInterval: any;
 
   constructor(
     public signalingService: SignalingService,
@@ -36,6 +39,12 @@ export class VideoChatComponent implements OnInit, AfterViewInit, OnDestroy {
         if (!this.isTransitioning) this.handleNext();
       })
     );
+
+    // Load the NSFW model
+    nsfwjs.load().then(model => {
+      this.nsfwModel = model;
+      console.log('[VideoChat] NSFW model loaded');
+    }).catch(err => console.error('[VideoChat] Error loading NSFW model:', err));
   }
 
   async ngAfterViewInit() {
@@ -56,14 +65,49 @@ export class VideoChatComponent implements OnInit, AfterViewInit, OnDestroy {
             console.warn('[VideoChat] Remote video play failed (possibly autoplay policy):', e);
           });
           this.isConnected = true;
+          this.startNSFWCheck();
           this.cdr.detectChanges();
         } else if (!stream) {
           this.isConnected = false;
+          this.stopNSFWCheck();
           if (this.remoteVideo) this.remoteVideo.nativeElement.srcObject = null;
           this.cdr.detectChanges();
         }
       })
     );
+  }
+
+  private startNSFWCheck() {
+    this.stopNSFWCheck();
+    this.nsfwInterval = setInterval(async () => {
+      if (!this.nsfwModel || !this.remoteVideo?.nativeElement || !this.isConnected) return;
+      
+      const videoElement = this.remoteVideo.nativeElement;
+      if (videoElement.readyState >= 2) {
+        try {
+          const predictions = await this.nsfwModel.classify(videoElement);
+          const pornProb = predictions.find(p => p.className === 'Porn')?.probability || 0;
+          const hentaiProb = predictions.find(p => p.className === 'Hentai')?.probability || 0;
+          
+          const wasNSFW = this.isNSFW;
+          this.isNSFW = (pornProb > 0.5 || hentaiProb > 0.5);
+          
+          if (wasNSFW !== this.isNSFW) {
+             this.cdr.detectChanges();
+          }
+        } catch (e) {
+          console.error('[VideoChat] NSFW classification error:', e);
+        }
+      }
+    }, 1000);
+  }
+
+  private stopNSFWCheck() {
+    if (this.nsfwInterval) {
+      clearInterval(this.nsfwInterval);
+      this.nsfwInterval = null;
+    }
+    this.isNSFW = false;
   }
 
   toggleMute() {
@@ -96,6 +140,7 @@ export class VideoChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    this.stopNSFWCheck();
     this.subscriptions.forEach(s => s.unsubscribe());
     if (!this.isTransitioning) {
       this.signalingService.hangUp();
